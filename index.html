@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pizza Mission">
+<meta name="theme-color" content="#191008">
+<title>Pizza Foodtruck Mission</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+/* ================= DESIGN-SYSTEM (Mission-Control-Palette, mobile-first) ================= */
+:root{
+  --ink:#211a14; --ink-soft:#5b5044; --ink-faint:#7d735f;
+  --paper:#f7f1e6; --paper-raised:#fffdf8; --paper-sunken:#efe6d3;
+  --line:#e3d9c6; --accent:#2f6b73; --accent-strong:#1f4e54; --accent-soft:#dbe8e8;
+  --ember:#b8400f; --ember-soft:#f5ded2; --basil:#43703a; --basil-soft:#dee9d8;
+  --semola:#a66d16; --semola-soft:#f2e2c4;
+  --gold:#b07d1e; --gold-soft:#faf3e2;
+  --head-bg:#191008; --head-ink:#f1e9da; --head-line:#c8401a;
+  --shadow:0 1px 2px rgba(33,26,20,.06),0 6px 20px -8px rgba(33,26,20,.18);
+  --font-display:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:'SF Mono','Cascadia Code',Consolas,ui-monospace,'Courier New',monospace;
+  --radius:12px;
+  --tabbar-h:60px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#f1e9da; --ink-soft:#bdb09a; --ink-faint:#9a8f79;
+    --paper:#161210; --paper-raised:#211b16; --paper-sunken:#0f0c0a;
+    --line:#3a3226; --accent:#63b6bd; --accent-strong:#8fd0d6; --accent-soft:#1c3538;
+    --ember:#e2895a; --ember-soft:#3a2418; --basil:#8bc079; --basil-soft:#24331e;
+    --semola:#e0ac4a; --semola-soft:#392c14;
+    --gold:#d9a84e; --gold-soft:#362a14;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#f1e9da; --ink-soft:#bdb09a; --ink-faint:#9a8f79;
+  --paper:#161210; --paper-raised:#211b16; --paper-sunken:#0f0c0a;
+  --line:#3a3226; --accent:#63b6bd; --accent-strong:#8fd0d6; --accent-soft:#1c3538;
+  --ember:#e2895a; --ember-soft:#3a2418; --basil:#8bc079; --basil-soft:#24331e;
+  --semola:#e0ac4a; --semola-soft:#392c14;
+  --gold:#d9a84e; --gold-soft:#362a14;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  margin:0;padding:0;background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-size:15.5px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh;
+  overscroll-behavior-y:none;
+}
+button{font-family:inherit;color:inherit}
+a{color:var(--accent-strong)}
+::selection{background:var(--accent-soft)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+noscript .noscript-warn{display:block;background:#8a2b12;color:#fff;padding:14px 20px;font-size:14px}
+
+/* ================= TOPBAR ================= */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:var(--head-bg);color:var(--head-ink);
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  border-bottom:3px solid var(--head-line);
+  display:flex;align-items:center;gap:10px;min-height:54px;
+}
+.topbar .tb-back{border:none;background:transparent;color:var(--head-ink);font-size:24px;padding:4px 8px;border-radius:8px;cursor:pointer;display:none;line-height:1}
+.topbar.can-back .tb-back{display:block}
+.topbar .tb-title{flex:1;min-width:0}
+.topbar .tb-title h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .tb-title small{display:block;font-size:11px;font-weight:400;color:#c9b49e;letter-spacing:.5px;text-transform:uppercase}
+.topbar .tb-actions{display:flex;gap:6px}
+.topbar .tb-actions button{
+  border:1px solid #5a4433;background:transparent;color:#e8d8c8;
+  padding:8px 13px;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+}
+.topbar .tb-actions button.primary{background:#c8401a;border-color:#c8401a;color:#fff}
+
+/* ================= MAIN / VIEWS ================= */
+main{padding:14px 14px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 24px);max-width:720px;margin:0 auto}
+.view{display:none}
+.view.active{display:block}
+@media (prefers-reduced-motion: no-preference){
+  .view.active{animation:fadeV .18s ease}
+  @keyframes fadeV{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+}
+h2.section-title{font-family:var(--font-display);font-size:19px;font-weight:600;margin:22px 0 4px}
+h2.section-title:first-child{margin-top:0}
+p.section-note{color:var(--ink-soft);font-size:13px;margin:0 0 12px}
+
+/* ================= TABBAR ================= */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:flex;background:var(--paper-raised);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -2px 14px rgba(0,0,0,.07);
+}
+.tabbar button{
+  flex:1;border:none;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 2px 6px;font-size:10.5px;font-weight:600;color:var(--ink-faint);
+  height:var(--tabbar-h);
+}
+.tabbar button .ti{font-size:21px;line-height:1}
+.tabbar button.active{color:var(--accent-strong)}
+.tabbar button.active .ti{transform:translateY(-1px)}
+
+/* ================= KOMPONENTEN ================= */
+.card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px 16px;margin-bottom:12px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:12px 13px;box-shadow:var(--shadow)}
+.kpi .label{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);margin:0 0 4px}
+.kpi .value{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:19px;font-weight:600;margin:0}
+.kpi .value small{font-size:11px;font-weight:500;color:var(--ink-faint)}
+.kpi .sub{font-size:11.5px;color:var(--ink-soft);margin:3px 0 0}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill-basil{background:var(--basil-soft);color:var(--basil)}
+.pill-ember{background:var(--ember-soft);color:var(--ember)}
+.pill-semola{background:var(--semola-soft);color:var(--semola)}
+.pill-gold{background:var(--gold-soft);color:var(--gold)}
+.pill-neutral{background:var(--paper-sunken);color:var(--ink-soft);border:1px solid var(--line)}
+.score{font-family:var(--font-mono);font-weight:700}
+.score-hi{color:var(--basil)} .score-mid{color:var(--semola)} .score-lo{color:var(--ember)}
+.mc-btn{border:1px solid transparent;border-radius:999px;padding:10px 18px;font-size:14.5px;font-weight:600;cursor:pointer}
+.mc-btn-primary{background:var(--accent);color:#fff}
+.mc-btn-ghost{background:transparent;border-color:var(--line);color:inherit}
+.mc-btn-danger{background:var(--ember);color:#fff}
+.mc-btn-block{display:block;width:100%;text-align:center;margin-bottom:8px}
+.mc-iconbtn{border:1px solid transparent;background:transparent;border-radius:8px;padding:6px 9px;font-size:16px;cursor:pointer;line-height:1.2;color:inherit;opacity:.72}
+.mc-empty{border:2px dashed var(--line);border-radius:var(--radius);padding:30px 16px;text-align:center;color:var(--ink-faint);font-size:14px}
+.mc-empty .mc-btn{margin-top:12px}
+.hint{font-size:12px;color:var(--ink-faint);margin-top:8px;font-style:italic}
+.warn-box{background:var(--gold-soft);border:1px solid var(--semola);border-radius:var(--radius);padding:12px 14px;font-size:13px;margin:10px 0}
+.result-box{background:var(--basil-soft);border:1px solid var(--basil);border-radius:var(--radius);padding:13px 16px;margin-top:12px}
+.result-box .big{font-size:24px;font-weight:800;font-family:var(--font-mono);color:var(--basil);margin:2px 0}
+.result-box p{margin:0;font-size:13px}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.quick-actions button{
+  border:1px solid var(--line);background:var(--paper-raised);border-radius:var(--radius);
+  padding:13px 10px;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--ink);
+}
+.quick-actions button .qi{font-size:23px;line-height:1}
+
+/* Listen (Mehr-Hub, Prozess, Entscheidungen …) */
+.nav-list{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.nav-list button{
+  display:flex;align-items:center;gap:12px;width:100%;border:none;background:transparent;
+  padding:14px 15px;font-size:15px;font-weight:600;cursor:pointer;text-align:left;color:var(--ink);
+  border-bottom:1px solid var(--line);
+}
+.nav-list button:last-child{border-bottom:none}
+.nav-list button .ni{font-size:20px;width:26px;text-align:center}
+.nav-list button .nsub{display:block;font-size:12px;font-weight:400;color:var(--ink-faint);margin-top:1px}
+.nav-list button .chev{margin-left:auto;color:var(--ink-faint);font-size:16px}
+.nav-list .nl-head{padding:11px 15px 3px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);font-weight:700}
+
+/* Batch-Karten */
+.batch-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.batch-head{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;flex-wrap:wrap}
+.batch-head .b-id{font-family:var(--font-mono);font-weight:700;font-size:15px}
+.batch-head .b-date{font-size:12.5px;color:var(--ink-soft)}
+.batch-head .b-flex{margin-left:auto;display:flex;align-items:center;gap:8px}
+.batch-body{border-top:1px solid var(--line);padding:12px 14px;display:none}
+.batch-card.open .batch-body{display:block}
+.batch-detail{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12.5px}
+.batch-detail .bd b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+.batch-detail .bd-wide{grid-column:1/-1}
+.batch-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.batch-note{font-size:13px;color:var(--ink-soft);padding:0 14px 11px;margin-top:-4px}
+.photo-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;margin-top:12px}
+.photo-strip .ph{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;border:1px solid var(--line);background:var(--paper-sunken);padding:0;cursor:pointer}
+.photo-strip .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-strip .ph-add{display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--ink-faint);aspect-ratio:1;border:2px dashed var(--line);border-radius:9px;background:transparent;cursor:pointer}
+
+/* Timer */
+.timer-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px}
+.timer-card.done{border-color:var(--ember);background:var(--ember-soft)}
+@media (prefers-reduced-motion: no-preference){
+  .timer-card.done{animation:pulseT 1.2s ease infinite}
+  @keyframes pulseT{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 5px var(--ember-soft)}}
+}
+.timer-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.timer-top .t-label{font-weight:700;font-size:15px}
+.timer-top .t-target{margin-left:auto;font-size:12px;color:var(--ink-faint);font-family:var(--font-mono)}
+.timer-count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:37px;font-weight:700;margin:4px 0 2px;letter-spacing:.5px}
+.timer-count.neg{color:var(--ember)}
+.timer-bar{height:6px;background:var(--paper-sunken);border-radius:99px;overflow:hidden;margin:6px 0 10px}
+.timer-bar div{height:100%;background:var(--accent);border-radius:99px}
+.timer-actions{display:flex;gap:8px;flex-wrap:wrap}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.preset-grid button{
+  border:1px solid var(--line);background:var(--paper-raised);border-radius:var(--radius);
+  padding:11px 10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;color:var(--ink);box-shadow:var(--shadow);
+}
+.preset-grid button small{display:block;font-family:var(--font-mono);color:var(--accent-strong);font-weight:700;margin-top:2px}
+
+/* Formulare / Felder */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field>label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+.field input[type=text],.field input[type=date],.field input[type=time],.field input[type=number],.field select,.field textarea{
+  font-family:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--paper);color:var(--ink);width:100%;appearance:none;-webkit-appearance:none;
+}
+.field input[type=number]{font-family:var(--font-mono)}
+.field textarea{min-height:74px;resize:vertical}
+.field .fhelp{font-size:11.5px;color:var(--ink-faint)}
+.field .ferror{font-size:12px;color:var(--ember);font-weight:600;display:none}
+.field.invalid .ferror{display:block}
+.field.invalid input,.field.invalid textarea{border-color:var(--ember)}
+.field input[type=range]{accent-color:var(--accent);width:100%;padding:0}
+.field .range-row{display:flex;align-items:center;gap:10px}
+.field .range-row output{font-family:var(--font-mono);font-weight:600;min-width:46px;text-align:right}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.fgrid2 .full{grid-column:1/-1}
+.mc-pills{display:flex;gap:7px;flex-wrap:wrap}
+.mc-pills label{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none}
+.mc-pills input{position:absolute;opacity:0;pointer-events:none}
+.mc-pills label.checked{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong)}
+details.fgroup{border:1px solid var(--line);border-radius:10px;margin-bottom:11px;background:var(--paper-sunken)}
+details.fgroup summary{cursor:pointer;padding:11px 13px;font-weight:700;font-size:13px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.fgroup summary::-webkit-details-marker{display:none}
+details.fgroup summary::after{content:"+";font-size:16px;color:var(--ink-faint)}
+details.fgroup[open] summary::after{content:"–"}
+details.fgroup .fgroup-body{padding:6px 13px 4px}
+
+/* Ergebnis-Kacheln (Rechner) */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px}
+.result-tile{background:var(--paper-sunken);border-radius:9px;padding:9px 11px}
+.result-tile .rl{font-size:10px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.05em}
+.result-tile .rv{font-family:var(--font-mono);font-size:16.5px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Tabellen */
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line);background:var(--paper-sunken);white-space:nowrap}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* Editierbare Zeilen (Budget, Kosten, Wirtschaftlichkeit) */
+.edit-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.edit-row:last-child{border-bottom:none}
+.edit-row .er-label{flex:1;min-width:0;font-size:14px}
+.edit-row .er-label small{display:block;font-size:11.5px;color:var(--ink-faint);font-weight:400}
+.edit-row input[type=number]{
+  width:92px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;
+  font-family:var(--font-mono);font-size:16px;text-align:right;background:var(--paper);color:var(--ink);flex-shrink:0;
+}
+.edit-row.total{font-weight:700}
+.edit-row.total .er-val{font-family:var(--font-mono);font-size:15px;white-space:nowrap}
+.cost-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:var(--paper-raised)}
+.cost-card .cc-head{display:flex;align-items:center;gap:8px}
+.cost-card .cc-head input[type=text]{flex:1;min-width:0;font-size:15px;font-weight:600;padding:7px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ink)}
+.cost-card .cc-head input[type=text]:focus{border-color:var(--line);background:var(--paper)}
+.cost-card .cc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:7px}
+.cost-card .cc-grid .field{margin-bottom:0}
+.cost-card .cc-grid input{padding:8px 9px;font-size:15px;text-align:right;font-family:var(--font-mono)}
+.cost-card .cc-cost{margin-top:7px;font-size:12.5px;color:var(--ink-soft);display:flex;justify-content:space-between}
+.cost-card .cc-cost b{font-family:var(--font-mono)}
+
+/* Fahrplan */
+.phase{margin-bottom:12px}
+.phase-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 14px;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);width:100%;text-align:left;gap:10px}
+.phase-head h3{font-size:14.5px;margin:0}
+.phase-head .meta{font-size:11.5px;color:var(--ink-faint);white-space:nowrap}
+.phase-body{display:none;padding:4px 0 0}
+.phase.open .phase-body{display:block}
+.task{display:flex;gap:11px;align-items:flex-start;background:var(--paper-raised);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:7px}
+.task input[type=checkbox]{width:21px;height:21px;margin-top:1px;accent-color:var(--basil);flex-shrink:0}
+.task.done .t-title{text-decoration:line-through;color:var(--ink-faint)}
+.t-title{font-weight:600;font-size:14px}
+.t-desc{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.progressbar{height:6px;background:var(--paper-sunken);border-radius:99px;overflow:hidden;margin-top:7px;width:90px}
+.progressbar div{height:100%;background:var(--basil);border-radius:99px;transition:width .3s}
+
+/* Timeline (Prozess, Entscheidungen) */
+.timeline{position:relative;margin:0;padding-left:22px;border-left:2px solid var(--line);list-style:none}
+.tl-item{position:relative;padding-bottom:16px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-28px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);border:2px solid var(--paper);box-shadow:0 0 0 2px var(--line)}
+.tl-time{font-family:var(--font-mono);font-size:11px;color:var(--accent-strong);font-weight:700}
+.tl-step{font-weight:600;margin:2px 0;font-size:14px}
+.tl-detail{font-size:13px;color:var(--ink-soft)}
+.tl-actions{display:flex;gap:2px;margin-top:5px}
+.dl-date{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);font-weight:700}
+.dl-decision{font-weight:600;margin:2px 0 3px;font-size:14px}
+.dl-why{font-size:12.5px;color:var(--ink-soft)}
+.dl-status{font-size:11px;margin-top:4px}
+
+/* Trouble / Wissen Accordions */
+details.acc{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:2px 14px;margin-bottom:9px}
+details.acc summary{cursor:pointer;list-style:none;padding:12px 0;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";font-family:var(--font-mono);font-size:16px;color:var(--accent);flex-shrink:0}
+details.acc[open] summary::after{content:"–"}
+details.acc .acc-body{padding:0 0 13px;font-size:13.5px}
+details.acc .acc-body p{margin:0 0 7px}
+details.acc .acc-body ul{margin:5px 0 7px 18px;padding:0}
+details.acc .acc-body li{margin-bottom:5px}
+.tb-label{font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.05em;margin:9px 0 2px;font-weight:700}
+.prio{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-family:var(--font-mono);font-weight:700;font-size:12px;flex-shrink:0}
+.prio-1{background:var(--ember-soft);color:var(--ember)}
+.prio-2{background:var(--semola-soft);color:var(--semola)}
+.prio-3,.prio-4{background:var(--paper-sunken);color:var(--ink-faint)}
+.spec{display:grid;grid-template-columns:110px 1fr;gap:9px 12px;margin:0}
+.spec dt{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);padding-top:2px}
+.spec dd{margin:0;font-size:13px}
+.spec dd .val{font-family:var(--font-mono);font-weight:600}
+.spec dd .why{display:block;color:var(--ink-soft);font-size:11.5px;margin-top:1px}
+.oven-zones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.zone{background:var(--paper-sunken);border-radius:9px;padding:10px 6px;text-align:center}
+.zone .zn{font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.05em}
+.zone .zt{font-family:var(--font-mono);font-size:15.5px;font-weight:700;margin:3px 0}
+.zone .zd{font-size:10.5px;color:var(--ink-soft)}
+
+/* Dialoge (Bestätigung + Formular-Sheet) */
+dialog.mc-dialog{border:none;border-radius:16px;padding:0;max-width:560px;width:calc(100vw - 32px);box-shadow:0 10px 40px rgba(0,0,0,.35);background:var(--paper-raised);color:var(--ink)}
+dialog.mc-dialog::backdrop{background:rgba(20,14,8,.55);backdrop-filter:blur(2px)}
+dialog.mc-sheet{
+  border:none;padding:0;background:var(--paper);color:var(--ink);
+  width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;
+}
+dialog.mc-sheet::backdrop{background:rgba(20,14,8,.4)}
+.mc-sheet form{display:flex;flex-direction:column;height:100dvh}
+.mc-sheet .dlg-head{
+  padding:calc(12px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);
+  background:var(--paper-raised);display:flex;align-items:center;gap:10px;position:sticky;top:0;
+}
+.mc-sheet .dlg-head .dh-text{flex:1;min-width:0}
+.mc-sheet .dlg-head h3{margin:0;font-size:16.5px;font-family:var(--font-display)}
+.mc-sheet .dlg-head p{margin:2px 0 0;font-size:12px;color:var(--ink-soft)}
+.mc-sheet .dlg-body{padding:14px 16px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.mc-sheet .dlg-foot{
+  display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:var(--paper-raised);
+}
+.mc-sheet .dlg-foot .mc-btn{flex:1;padding:13px 16px;font-size:15.5px}
+dialog.mc-dialog .dlg-head{padding:16px 18px 10px}
+dialog.mc-dialog .dlg-head h3{margin:0;font-size:16px;font-family:var(--font-display)}
+dialog.mc-dialog .dlg-body{padding:6px 18px 14px}
+dialog.mc-dialog .dlg-foot{display:flex;gap:10px;padding:0 18px 16px}
+dialog.mc-dialog .dlg-foot .mc-btn{flex:1}
+
+/* Foto-Viewer */
+dialog.photo-view{border:none;padding:0;background:#000;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0}
+.photo-view .pv-wrap{display:flex;flex-direction:column;height:100dvh}
+.photo-view img{flex:1;object-fit:contain;min-height:0;width:100%}
+.photo-view .pv-bar{display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#111}
+.photo-view .pv-bar button{flex:1;border:1px solid #444;background:transparent;color:#eee;padding:11px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer}
+.photo-view .pv-bar .pv-del{border-color:#a33;color:#f77}
+
+/* Toast */
+.mc-toast{
+  position:fixed;left:50%;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 14px);
+  transform:translateX(-50%);background:#211a14;color:#f1e9da;border-radius:999px;padding:11px 20px;
+  font-size:13.5px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:200;
+  display:flex;gap:14px;align-items:center;max-width:calc(100vw - 32px);
+}
+.mc-toast button{background:none;border:none;color:#e0ac4a;font-weight:700;font-size:13.5px;cursor:pointer;padding:0;text-decoration:underline}
+
+/* Install-Hinweis */
+.install-hint{background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 14px;font-size:13px;margin-bottom:12px}
+.install-hint b{color:var(--accent-strong)}
+
+@media(min-width:640px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .preset-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<noscript><div class="noscript-warn">⚠️ Diese App braucht JavaScript.</div></noscript>
+
+<header class="topbar" id="topbar">
+  <button class="tb-back" id="tbBack" aria-label="Zurück">‹</button>
+  <div class="tb-title"><h1 id="tbTitle">Pizza Mission</h1><small id="tbSub">Foodtruck · Jan Wälchli</small></div>
+  <div class="tb-actions" id="tbActions"></div>
+</header>
+
+<main id="main">
+<!-- ============ START ============ -->
+<section class="view active" id="view-home" data-title="Pizza Mission" data-sub="Foodtruck · Jan Wälchli">
+  <div class="install-hint" id="installHint" style="display:none">
+    <b>Als App installieren:</b> In Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) tippen → <b>«Zum Home-Bildschirm»</b>. Danach startet Pizza Mission wie eine normale App — mit Icon, Vollbild und offline.
+  </div>
+  <div class="quick-actions">
+    <button id="qaBatch"><span class="qi">🍕</span>Neuer Batch</button>
+    <button id="qaTimer"><span class="qi">⏱️</span>Timer starten</button>
+    <button id="qaFoto"><span class="qi">📷</span>Batch-Foto</button>
+    <button id="qaBackup"><span class="qi">💾</span>Backup</button>
+  </div>
+  <div id="homeTimerStrip"></div>
+  <h2 class="section-title">Pizza-System</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><p class="label">Kosten / Pizza</p><p class="value" id="kpiCost">–</p><p class="sub" id="kpiCostSub">Zutaten + Pauschalen</p></div>
+    <div class="kpi"><p class="label">Deckungsbeitrag</p><p class="value" id="kpiMargin">–</p><p class="sub" id="kpiMarginPct">–</p></div>
+    <div class="kpi"><p class="label">Letzter Batch</p><p class="value" id="kpiLastBatch">–</p><p class="sub" id="kpiLastBatchSub">–</p></div>
+    <div class="kpi"><p class="label">Aktuelles Rezept</p><p class="value" id="kpiRecipe">–</p><p class="sub" id="kpiRecipeSub">–</p></div>
+  </div>
+  <h2 class="section-title">Business</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><p class="label">Budget benötigt</p><p class="value" id="kpiBudget">–</p><p class="sub">inkl. 12% Reserve</p></div>
+    <div class="kpi"><p class="label">Gewinn / Monat</p><p class="value" id="kpiProfit">–</p><p class="sub" id="kpiBreakeven">–</p></div>
+    <div class="kpi"><p class="label">Fahrplan</p><p class="value" id="kpiProgress">–</p><p class="sub" id="kpiProgressSub">–</p></div>
+  </div>
+  <p class="hint" id="backupStatus">–</p>
+</section>
+
+<!-- ============ BATCHES ============ -->
+<section class="view" id="view-batches" data-title="Batch-Log" data-sub="1 Batch = 1 Teig · nur 1 Variable ändern">
+  <div id="batchList"></div>
+  <div class="mc-empty" id="batchEmpty" style="display:none">
+    Noch keine Batches geloggt.<br>
+    <button class="mc-btn mc-btn-primary" id="batchEmptyAddBtn">+ Ersten Batch anlegen</button>
+  </div>
+</section>
+
+<!-- ============ TEIG-RECHNER ============ -->
+<section class="view" id="view-rechner" data-title="Rezept-Rechner" data-sub="24h-System · speichert automatisch">
+  <div class="card">
+    <div class="fgrid2">
+      <div class="field"><label for="inBallen">Anzahl Ballen</label><input type="number" id="inBallen" value="3" min="1" max="200" step="1" inputmode="numeric"></div>
+      <div class="field"><label for="inGewicht">Ballengewicht (g)</label><input type="number" id="inGewicht" value="290" min="100" max="500" step="1" inputmode="numeric"></div>
+    </div>
+    <div class="field"><label for="inHydration">Hydration (% vom Mehl)</label>
+      <div class="range-row"><input type="range" id="inHydration" value="70" min="55" max="85" step="0.5"><output id="outHydration">70%</output></div>
+    </div>
+    <div class="field"><label for="inSalz">Salz (% vom Mehl)</label>
+      <div class="range-row"><input type="range" id="inSalz" value="2.8" min="1" max="4" step="0.1"><output id="outSalz">2.8%</output></div>
+    </div>
+    <div class="field"><label for="inHefe">Frischhefe (% vom Mehl)</label>
+      <div class="range-row"><input type="range" id="inHefe" value="0.5" min="0.1" max="3" step="0.1"><output id="outHefe">0.5%</output></div>
+    </div>
+    <div class="result-grid">
+      <div class="result-tile"><div class="rl">Teig total</div><div class="rv" id="rTotal">–</div></div>
+      <div class="result-tile"><div class="rl">Mehl</div><div class="rv" id="rMehl">–</div></div>
+      <div class="result-tile"><div class="rl">Wasser</div><div class="rv" id="rWasser">–</div></div>
+      <div class="result-tile"><div class="rl">Salz</div><div class="rv" id="rSalz">–</div></div>
+      <div class="result-tile"><div class="rl">Frischhefe</div><div class="rv" id="rHefe">–</div></div>
+    </div>
+    <p class="hint" id="faustformelHint">–</p>
+  </div>
+  <h2 class="section-title">Mengentabelle</h2>
+  <p class="section-note">Gleiche Prozente, andere Ballenzahl.</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th class="num">Ballen</th><th class="num">Teig (g)</th><th class="num">Mehl (g)</th><th class="num">Wasser (g)</th><th class="num">Salz (g)</th><th class="num">Hefe (g)</th></tr></thead>
+      <tbody id="scaleTableBody"></tbody>
+    </table>
+  </div>
+  <h2 class="section-title">Aktueller Standardteig</h2>
+  <div class="card">
+    <dl class="spec">
+      <dt>Mehl</dt><dd><span class="val">Caputo Nuvola</span><span class="why">Hohe Wasseraufnahme, starker Ofentrieb</span></dd>
+      <dt>Hefe</dt><dd><span class="val">Frischhefe</span><span class="why">Trockenhefe getestet &amp; verworfen</span></dd>
+      <dt>Kneten</dt><dd><span class="val">3–4 Min langsam + 6–8 Min schnell</span><span class="why">Fenstertest</span></dd>
+      <dt>Ziel-Teigtemp.</dt><dd><span class="val">22–24 °C</span><span class="why">Kontrolle der Fermentationsgeschwindigkeit</span></dd>
+      <dt>Kaltgare</dt><dd><span class="val">24h-System</span><span class="why">Kühlschrank real 6–8 °C, ~19–20h + Raumgare</span></dd>
+      <dt>Raumgare</dt><dd><span class="val">2.5–3.5 h</span><span class="why">BT-013-Erkenntnis: künftig ~2 h anpeilen</span></dd>
+      <dt>Stretch &amp; Fold</dt><dd><span class="val">1× nach 20–30 Min</span><span class="why">Fest integriert seit BT-013</span></dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ TIMER ============ -->
+<section class="view" id="view-timer" data-title="Teig-Timer" data-sub="läuft nur bei offener App — für Erinnerungen: Kalender-Knopf">
+  <div class="warn-box" id="timerIosHint">📌 <strong>iPhone-Hinweis:</strong> Web-Apps dürfen ohne geöffnete App keinen Alarm abspielen. Für wichtige Schritte (z.B. «Ballen aus dem Kühlschrank») beim Timer auf <strong>«📅 Kalender»</strong> tippen — dann erinnert dich der iPhone-Kalender zuverlässig.</div>
+  <h2 class="section-title">Schnellstart aus dem 24h-Prozess</h2>
+  <div class="preset-grid" id="presetGrid"></div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="timerCustomBtn">+ Eigener Timer</button>
+  <h2 class="section-title">Aktive Timer</h2>
+  <div id="timerList"></div>
+  <div class="mc-empty" id="timerEmpty">Kein Timer aktiv.</div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="wakeLockBtn" style="margin-top:14px">☀️ Bildschirm wachhalten: aus</button>
+</section>
+
+<!-- ============ MEHR (Hub) ============ -->
+<section class="view" id="view-mehr" data-title="Mehr" data-sub="alle Bereiche">
+  <div class="nav-list">
+    <div class="nl-head">Pizza-System</div>
+    <button data-go="prozess"><span class="ni">📋</span><span>Ofen &amp; Prozess<span class="nsub">Standardprozess 24h-Teig, Ofen-Zielwerte</span></span><span class="chev">›</span></button>
+    <button data-go="kosten"><span class="ni">🧾</span><span>Kostenkalkulation<span class="nsub">Zutaten, Pauschalen, Deckungsbeitrag</span></span><span class="chev">›</span></button>
+    <button data-go="trouble"><span class="ni">🛠️</span><span>Troubleshooting<span class="nsub">Symptome, Ursachen, Massnahmen</span></span><span class="chev">›</span></button>
+    <button data-go="roadmap"><span class="ni">🧭</span><span>Roadmap &amp; Entscheidungen<span class="nsub">Hypothesen und Entscheidungslog</span></span><span class="chev">›</span></button>
+  </div>
+  <div class="nav-list">
+    <div class="nl-head">Business-Konzept</div>
+    <button data-go="budget"><span class="ni">💰</span><span>Budget<span class="nsub">Investition und Fixkosten, editierbar</span></span><span class="chev">›</span></button>
+    <button data-go="fahrplan"><span class="ni">🗺️</span><span>Fahrplan &amp; Aufgaben<span class="nsub">6 Phasen, 34 Aufgaben mit Häkchen</span></span><span class="chev">›</span></button>
+    <button data-go="wirtschaft"><span class="ni">📈</span><span>Wirtschaftlichkeit<span class="nsub">Gewinn-Rechner und Break-even</span></span><span class="chev">›</span></button>
+    <button data-go="wissen"><span class="ni">📚</span><span>Konzept-Wissen<span class="nsub">Setup, Recht, Betrieb, Marketing</span></span><span class="chev">›</span></button>
+  </div>
+  <div class="nav-list">
+    <div class="nl-head">App</div>
+    <button data-go="settings"><span class="ni">⚙️</span><span>Einstellungen &amp; Backup<span class="nsub">Theme, Export/Import, Fotos</span></span><span class="chev">›</span></button>
+  </div>
+</section>
+
+<!-- ============ PROZESS ============ -->
+<section class="view" id="view-prozess" data-title="Ofen &amp; Prozess" data-back="mehr" data-sub="Standardprozess 24h-Teig">
+  <div class="card">
+    <h2 class="section-title">Ofen-Zielwerte — Ooni Koda 12</h2>
+    <div class="oven-zones">
+      <div class="zone"><div class="zn">Vorne</div><div class="zt">440–460°</div><div class="zd">kühler</div></div>
+      <div class="zone"><div class="zn">Mitte</div><div class="zt">480–490°</div><div class="zd">Referenz</div></div>
+      <div class="zone"><div class="zn">Hinten</div><div class="zt">500–510°</div><div class="zd">seit BT-011 reduziert</div></div>
+    </div>
+    <p class="hint">Backzeit ca. 110–120 Sek. Messung per Infrarot-Thermometer vor Einschuss.</p>
+  </div>
+  <h2 class="section-title">Standardprozess 24-Stunden-Teig</h2>
+  <p class="section-note" id="processNote">Festgelegt am 30.07.2026. Pro Testbatch nur eine Variable ändern.</p>
+  <div class="card">
+    <ol class="timeline" id="processList"></ol>
+    <div class="mc-empty" id="processEmpty" style="display:none">Noch keine Prozess-Schritte definiert.</div>
+  </div>
+</section>
+
+<!-- ============ KOSTEN ============ -->
+<section class="view" id="view-kosten" data-title="Kostenkalkulation" data-back="mehr" data-sub="pro Pizza (Margherita)">
+  <div id="costList"></div>
+  <h2 class="section-title">Pauschalen pro Pizza</h2>
+  <div id="extraList"></div>
+  <div class="card">
+    <div class="edit-row total"><span class="er-label">Gesamtkosten pro Pizza</span><span class="er-val" id="costTotal">–</span></div>
+    <div class="edit-row"><span class="er-label">Verkaufspreis <small>Annahme, nicht recherchiert</small></span><input type="number" id="sellPrice" value="18" step="0.5" min="0" inputmode="decimal" aria-label="Verkaufspreis in CHF"></div>
+    <div class="edit-row total"><span class="er-label">Deckungsbeitrag / Pizza</span><span class="er-val" id="marginTotal" style="color:var(--basil)">–</span></div>
+  </div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="costFromRecipeBtn">⇄ Mengen aus Rezept übernehmen</button>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="costResetBtn">↺ Standardwerte</button>
+  <p class="hint">Zutaten rechnen über Preis pro Packung. Quellen: Migros / Otto's / ital. Lebensmittelhandel.</p>
+</section>
+
+<!-- ============ TROUBLESHOOTING ============ -->
+<section class="view" id="view-trouble" data-title="Troubleshooting" data-back="mehr" data-sub="nach Symptom — antippen für Details">
+  <div id="troubleList"></div>
+  <div class="mc-empty" id="troubleEmpty" style="display:none">Noch keine Einträge.</div>
+</section>
+
+<!-- ============ ROADMAP & ENTSCHEIDUNGEN ============ -->
+<section class="view" id="view-roadmap" data-title="Roadmap &amp; Entscheidungen" data-back="mehr" data-sub="Hypothesen · Entscheidungslog">
+  <h2 class="section-title">Offene Hypothesen</h2>
+  <p class="section-note">Nach Priorität sortiert (1 = höchste).</p>
+  <div id="roadmapList"></div>
+  <div class="mc-empty" id="roadmapEmpty" style="display:none">Noch keine Hypothesen.</div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="roadmapAddBtn">+ Neue Hypothese</button>
+  <h2 class="section-title">Entscheidungslog</h2>
+  <p class="section-note">Neueste zuerst — jede Änderung braucht eine Begründung.</p>
+  <div class="card"><ol class="timeline" id="decisionList"></ol>
+  <div class="mc-empty" id="decisionEmpty" style="display:none">Noch keine Entscheidungen protokolliert.</div></div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="decisionAddBtn">+ Entscheidung protokollieren</button>
+</section>
+
+<!-- ============ BUDGET ============ -->
+<section class="view" id="view-budget" data-title="Budget" data-back="mehr" data-sub="editierbar — rechnet live">
+  <h2 class="section-title">Investition (einmalig)</h2>
+  <div class="card" id="investCard"></div>
+  <h2 class="section-title">Laufende Kosten / Monat</h2>
+  <div class="card" id="fixCard"></div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="budgetResetBtn">↺ Standardwerte</button>
+  <p class="hint">Reserve (12%) fängt Überraschungen ab: Gasabnahme-Nachbesserungen, Ersatzteile, Zusatzequipment.</p>
+</section>
+
+<!-- ============ FAHRPLAN ============ -->
+<section class="view" id="view-fahrplan" data-title="Fahrplan &amp; Aufgaben" data-back="mehr" data-sub="6 Phasen bis zur Eröffnung">
+  <div id="phases"></div>
+</section>
+
+<!-- ============ WIRTSCHAFTLICHKEIT ============ -->
+<section class="view" id="view-wirtschaft" data-title="Wirtschaftlichkeit" data-back="mehr" data-sub="konservative Startwerte, live gerechnet">
+  <h2 class="section-title">Annahmen pro Monat</h2>
+  <div class="card" id="calcCard"></div>
+  <h2 class="section-title">Ergebnis</h2>
+  <div class="card">
+    <div class="edit-row"><span class="er-label">Umsatz / Monat</span><span class="er-val" id="oRevenue" style="font-family:var(--font-mono)">–</span></div>
+    <div class="edit-row"><span class="er-label">Wareneinsatz</span><span class="er-val" id="oCogs" style="font-family:var(--font-mono)">–</span></div>
+    <div class="edit-row"><span class="er-label">Standgebühren + Fahrt + Helfer</span><span class="er-val" id="oEventCosts" style="font-family:var(--font-mono)">–</span></div>
+    <div class="edit-row"><span class="er-label">Fixkosten</span><span class="er-val" id="oFix" style="font-family:var(--font-mono)">–</span></div>
+    <div class="edit-row total"><span class="er-label">Gewinn / Monat (vor Steuern &amp; AHV)</span><span class="er-val" id="oProfit">–</span></div>
+    <div class="edit-row"><span class="er-label">Gewinn pro Event</span><span class="er-val" id="oPerEvent" style="font-family:var(--font-mono)">–</span></div>
+    <div class="edit-row"><span class="er-label">Gewinn pro Pizza</span><span class="er-val" id="oPerPizza" style="font-family:var(--font-mono)">–</span></div>
+    <div class="result-box">
+      <p style="font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:12px;color:var(--basil)">Break-even der Investition</p>
+      <p class="big" id="oBreakeven">–</p>
+      <p id="oBreakevenSub">–</p>
+    </div>
+  </div>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="calcResetBtn">↺ Standardwerte</button>
+  <div class="warn-box">Faustregel Vollzeit-Schwelle: Ab <strong>8–10 Events/Monat</strong> mit je 85+ Pizzen liegt der Gewinn bei CHF 7'500–10'000/Monat.</div>
+  <h2 class="section-title">Szenarien</h2>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Szenario</th><th class="num">Events</th><th class="num">Pizzen</th><th class="num">Gewinn/Mt*</th></tr></thead>
+      <tbody>
+        <tr><td>🌧️ Vorsichtig</td><td class="num">2</td><td class="num">60</td><td class="num">~700</td></tr>
+        <tr><td>✅ Basis</td><td class="num">4</td><td class="num">80</td><td class="num">~3'100</td></tr>
+        <tr><td>🚀 Gut gebucht</td><td class="num">6</td><td class="num">90</td><td class="num">~5'700</td></tr>
+        <tr><td>🏆 Vollzeit</td><td class="num">10</td><td class="num">90</td><td class="num">~9'900</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint">*mit Default-Kostenstruktur, vor Steuern/AHV — CHF.</p>
+</section>
+
+<!-- ============ WISSEN ============ -->
+<section class="view" id="view-wissen" data-title="Konzept-Wissen" data-back="mehr" data-sub="Setup · Recht · Betrieb · Marketing">
+  <h2 class="section-title">Das Konzept in 60 Sekunden</h2>
+  <div class="card" style="font-size:13.5px">
+    <p style="margin:0"><strong>Modell:</strong> Mobiler Pizza-Stand auf Basis eines gebrauchten Verkaufsanhängers mit Gas-Steinofen. Start im <strong>Nebenerwerb</strong> mit 3–5 Einsätzen pro Monat. Das 24/48h-Teigsystem ist das Qualitäts-Alleinstellungsmerkmal — das rechtfertigt CHF 16–19 pro Pizza.</p>
+    <p style="margin:8px 0 0"><strong>Wachstumspfad:</strong> Phase 1 Nebenerwerb (Jahr 1). Phase 2 ab ~CHF 4'000 Gewinn/Monat über 6 Monate stabil: Pensum reduzieren. Phase 3: Vollzeit ab 8+ Einsätzen/Monat.</p>
+  </div>
+  <div class="warn-box"><strong>Wichtigste Regel:</strong> Erst die Anforderungen des Lebensmittelinspektorats deines Kantons kennen, <em>dann</em> den Anhänger kaufen. Nachrüsten ist der teuerste Fehler im Foodtruck-Business.</div>
+
+  <h2 class="section-title">Setup-Empfehlung</h2>
+  <details class="acc"><summary>🛒 Anhänger + Gas-Steinofen (Empfehlung)</summary><div class="acc-body">
+    <ul>
+      <li><strong>Warum gebraucht:</strong> Für CHF 8'000–15'000 gibt es solide gebrauchte Imbissanhänger mit Grundausstattung. Neu kostet dasselbe 30'000–50'000.</li>
+      <li><strong>Warum Gas statt Holz:</strong> Konstante Temperatur (450–480°C), keine Brandschutz-Sonderauflagen, du kannst allein arbeiten. Den Geschmacksunterschied macht dein 48h-Teig — nicht das Holz.</li>
+      <li><strong>Ofen konkret:</strong> Gastro-Gas-Pizzaofen mit Steinplatte, 2 Ebenen — gebraucht CHF 1'500–3'500.</li>
+      <li><strong>Beim Kauf achten auf:</strong> lebensmitteltauglicher Innenausbau, Frisch-/Abwassertank + Handwaschbecken mit Warmwasser (Pflicht!), Gasabnahme-Zertifikat, Gesamtgewicht passend zum Zugfahrzeug. → Besichtigungs-Checkliste als PDF im Projektordner.</li>
+    </ul>
+    <p class="hint">Suchbegriffe für anibis/tutti/gastroinserate: «Verkaufsanhänger», «Imbisswagen», «Foodtrailer», «Marktanhänger Gastro».</p>
+  </div></details>
+  <details class="acc"><summary>🚚 Alternativen (verworfen)</summary><div class="acc-body">
+    <ul>
+      <li><strong>Foodtruck mit Holzofen:</strong> CHF 60'000–120'000+ — sprengt das Budget. Beste Show, aber Nachlegen, Asche, Brandschutzauflagen.</li>
+      <li><strong>Piaggio Ape / Kleinformat:</strong> CHF 15'000–35'000, nur 15–25 Pizzen/h — Plan B / Marketing-Juwel.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>🚗 Führerschein-Check</summary><div class="acc-body">
+    <p>Anhänger über 750 kg + Zugfahrzeug über 3'500 kg Kombination → Kategorie <strong>BE</strong> nötig. Viele Imbissanhänger wiegen 1'000–2'000 kg. BE-Prüfung ~CHF 400–800 (nur praktische Prüfung) — im Budget eingeplant.</p>
+  </div></details>
+
+  <h2 class="section-title">Bewilligungen &amp; Recht (CH, Stand 2026)</h2>
+  <details class="acc"><summary>1 · Meldung als Lebensmittelbetrieb <span class="pill pill-ember">zwingend</span></summary><div class="acc-body">
+    <p>Jeder Lebensmittelbetrieb — auch mobil — muss sich beim <strong>kantonalen Lebensmittelinspektorat</strong> melden (Art. 20 LGV). Frühzeitig anrufen: Viele Inspektorate beraten kostenlos, welche Anforderungen dein Anhänger erfüllen muss — <em>vor dem Kauf</em> klären!</p>
+    <ul><li>Typische Anforderungen: Handwaschbecken mit Warmwasser, Frisch-/Abwassertank, abwaschbare Oberflächen, Kühlkette (max. 5°C).</li></ul>
+  </div></details>
+  <details class="acc"><summary>2 · Selbstkontrolle / HACCP <span class="pill pill-ember">zwingend</span></summary><div class="acc-body">
+    <p>Schriftliches <strong>Selbstkontrollkonzept</strong>: Temperaturkontrollen, Reinigungsplan, Rückverfolgbarkeit, Schulungsnachweis. Basis: Branchenleitlinie GastroSuisse.</p>
+    <ul>
+      <li>Dein Batch-Log ist bereits die halbe Miete für die Rückverfolgbarkeit — Temperatur-Logs ergänzen.</li>
+      <li>Allergene mündlich/schriftlich auskunftsfähig; Fleisch-Herkunft schriftlich anschlagen.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>3 · Standplatz-Bewilligungen <span class="pill pill-ember">zwingend</span></summary><div class="acc-body">
+    <ul>
+      <li><strong>Öffentlicher Grund:</strong> Bewilligung der Gemeinde, CHF 20–100+/Tag.</li>
+      <li><strong>Märkte/Festivals:</strong> Bewerbung 2–6 Monate im Voraus, Gebühr fix oder 10–20% vom Umsatz.</li>
+      <li><strong>Privatgrund:</strong> keine Bewilligung nötig — dein einfachster Einstieg!</li>
+      <li>Einige Kantone verlangen ein Wandergewerbe-/Marktfahrer-Patent.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>4 · Gasinstallation &amp; Sicherheit <span class="pill pill-ember">zwingend</span></summary><div class="acc-body">
+    <ul>
+      <li>Flüssiggasanlage von Fachperson abnehmen lassen (EKAS/SVGW), ~CHF 300–600, periodische Wiederholung.</li>
+      <li>Feuerlöscher (min. 1× 6kg ABC) + Löschdecke — Veranstalter verlangen den Nachweis.</li>
+      <li>Gasflaschen stehend und gesichert transportieren.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>5 · Firma, Steuern, AHV <span class="pill pill-gold">wichtig</span></summary><div class="acc-body">
+    <ul>
+      <li><strong>Einzelfirma:</strong> formlos, HR-Eintrag erst ab CHF 100'000 Umsatz Pflicht.</li>
+      <li><strong>AHV:</strong> Anmeldung als Selbständigerwerbender im Nebenerwerb; ~10% vom Gewinn.</li>
+      <li><strong>MwSt:</strong> erst ab CHF 100'000 Jahresumsatz.</li>
+      <li><strong>Steuern:</strong> ~20–25% des Gewinns zurücklegen.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>6 · Versicherungen <span class="pill pill-gold">wichtig</span></summary><div class="acc-body">
+    <ul>
+      <li><strong>Betriebshaftpflicht:</strong> ~CHF 400–800/Jahr — Pflicht bei fast allen Veranstaltern.</li>
+      <li><strong>Anhänger:</strong> Kasko/Diebstahl separat ~CHF 300–600/Jahr — der Anhänger ist dein Kapital.</li>
+      <li><strong>Inventar/Kühlgutverderb:</strong> optional, ~CHF 200–400/Jahr.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>7 · Weitere Pflichten</summary><div class="acc-body">
+    <ul>
+      <li><strong>Preisanschrift</strong> gut sichtbar (PBV).</li>
+      <li><strong>Abfall:</strong> Mehrweg-Pflicht an vielen CH-Festivals; Altöl/Abwasser fachgerecht entsorgen.</li>
+      <li><strong>Aggregat:</strong> teils verboten — CEE-16A-Landstromkabel immer dabei.</li>
+    </ul>
+  </div></details>
+
+  <h2 class="section-title">Betrieb &amp; Events</h2>
+  <details class="acc"><summary>🗓️ Ablauf eines Event-Tags (Sa, 17–21 Uhr)</summary><div class="acc-body">
+    <ul style="margin-left:0;padding-left:18px">
+      <li><strong>T−48h (Do Abend):</strong> Teig ansetzen, Stockgare starten. Ballen = erwartete Pizzen × 1.15.</li>
+      <li><strong>T−24h (Fr Abend):</strong> Rundwirken &amp; Boxen, Kühlgare. Einkauf Frischware, Saucen-Mise-en-place.</li>
+      <li><strong>T−5h:</strong> Beladen — Teigboxen gekühlt, Gas-Reserveflasche, Wassertank, Wechselgeld/Terminal.</li>
+      <li><strong>T−3h:</strong> Anfahrt &amp; Aufbau, Ofen anheizen (45–60 min auf 450°C).</li>
+      <li><strong>T−1h:</strong> Testpizza, Ballen akklimatisieren, Social-Media-Story.</li>
+      <li><strong>Service:</strong> Solo ~30–40 Pizzen/h, mit Helfer 50–60/h.</li>
+      <li><strong>+1.5h:</strong> Abbau, Grobreinigung, zuhause Feinreinigung + Temperatur-Log + Batch-Foto.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>📍 Standort-Mix Schweiz</summary><div class="acc-body">
+    <p><strong>🥇 Jahr 1:</strong></p>
+    <ul>
+      <li><strong>Privat-Events</strong> — Pauschale CHF 1'200–1'800 für 50–80 Gäste, kein Wetterrisiko.</li>
+      <li><strong>Firmen-Lunches:</strong> KMU anschreiben — planbar und wiederkehrend.</li>
+      <li><strong>Hofläden/Weingüter/Brauereien:</strong> Feierabend-Pizza als Kooperation.</li>
+      <li><strong>Dorffeste &amp; Wochenmärkte:</strong> moderate Gebühren, Stammkundschaft.</li>
+    </ul>
+    <p><strong>🥈 Später:</strong> Food-Festivals (Gebühren 10–20%), fixer Wochenstandplatz (Schlüssel zum Vollzeit-Übergang), Weihnachtsmärkte.</p>
+  </div></details>
+  <details class="acc"><summary>🍕 Karte: klein und kompromisslos</summary><div class="acc-body">
+    <ul>
+      <li><strong>4–6 Pizzen max:</strong> Margherita (16.–), Salame (18.–), 1–2 Specials (19.–), 1 vegane Option.</li>
+      <li><strong>Getränke:</strong> Dosen/Flaschen, kein Offenausschank.</li>
+      <li><strong>Kasse:</strong> SumUp/Zettle (~1.5–2.5% Gebühr) — TWINT ist Pflichtprogramm.</li>
+    </ul>
+  </div></details>
+
+  <h2 class="section-title">Marketing</h2>
+  <details class="acc"><summary>🎯 Positionierung</summary><div class="acc-body">
+    <p>Nicht «noch ein Pizzastand», sondern <strong>«48 Stunden Teig. 90 Sekunden Ofen.»</strong> — Handwerks-Story sichtbar machen. Deine Batch-Fotodoku ist perfekter Content.</p>
+    <ul>
+      <li><strong>Name &amp; Logo:</strong> muss auf Anhänger und Instagram funktionieren (CHF 200–500).</li>
+      <li><strong>Anhänger = Plakatwand:</strong> Folierung CHF 800–2'000 — wichtigstes Marketinginstrument.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>📣 Kanäle (nach Priorität)</summary><div class="acc-body">
+    <ul>
+      <li><strong>Instagram:</strong> 2–3 Posts/Woche ab 3 Monate vor Launch; Story am Event-Tag mit Standort.</li>
+      <li><strong>Google Business Profile:</strong> Bewertungen aktiv einsammeln (QR-Code am Stand).</li>
+      <li><strong>1-Seiten-Website:</strong> Story, Standort-Kalender, Event-Anfrageformular — wertvollster Kanal!</li>
+      <li><strong>WhatsApp-Broadcast:</strong> «Wo stehen wir diese Woche».</li>
+      <li><strong>Lokalpresse:</strong> Gratis-PR zur Eröffnung.</li>
+    </ul>
+  </div></details>
+  <details class="acc"><summary>🚀 Launch-Plan</summary><div class="acc-body">
+    <ul>
+      <li><strong>Soft-Launch:</strong> 2 Freundes-/Familienevents als Generalprobe.</li>
+      <li><strong>Eröffnungsevent:</strong> sichtbarer Standort, «Margherita 10.–», Presse + Instagram anfüttern.</li>
+      <li><strong>Ziel Monat 1–3:</strong> 300 Follower, 25+ Google-Bewertungen ≥4.5★, 3 wiederkehrende Standorte, 2 bezahlte Privatevents.</li>
+    </ul>
+  </div></details>
+</section>
+
+<!-- ============ EINSTELLUNGEN ============ -->
+<section class="view" id="view-settings" data-title="Einstellungen &amp; Backup" data-back="mehr" data-sub="Daten liegen lokal auf diesem Gerät">
+  <h2 class="section-title">Darstellung</h2>
+  <div class="nav-list"><button id="themeBtn"><span class="ni">🌓</span><span>Farbschema<span class="nsub" id="themeSub">Auto</span></span><span class="chev">›</span></button></div>
+  <h2 class="section-title">Backup</h2>
+  <p class="section-note">Gleiche Backup-Dateien wie Mission Control am PC — in beide Richtungen kompatibel.</p>
+  <button class="mc-btn mc-btn-primary mc-btn-block" id="exportBtn">⬇ Backup erstellen (Daten)</button>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="exportPhotosBtn">⬇ Backup inkl. Fotos</button>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="importBtn">⬆ Backup laden</button>
+  <p class="hint" id="settingsBackupStatus">–</p>
+  <p class="hint" id="photoStats">–</p>
+  <h2 class="section-title">Info</h2>
+  <div class="card" style="font-size:13px">
+    <p style="margin:0 0 6px"><strong>Pizza Foodtruck Mission</strong> · <span id="appVersion">v1</span></p>
+    <p style="margin:0 0 6px;color:var(--ink-soft)">Alle Daten (Batches, Budget, Aufgaben, Timer) liegen lokal auf diesem Gerät. Fotos ebenfalls — sie sind nur im «Backup inkl. Fotos» enthalten.</p>
+    <p style="margin:0;color:var(--ink-soft)" id="persistStatus">–</p>
+  </div>
+</section>
+<!-- ###NEXT### -->
+</main>
+
+<nav class="tabbar" id="tabbar" aria-label="Hauptnavigation">
+  <button data-nav="home" class="active"><span class="ti">🏠</span>Start</button>
+  <button data-nav="batches"><span class="ti">🍕</span>Batches</button>
+  <button data-nav="rechner"><span class="ti">🧮</span>Rechner</button>
+  <button data-nav="timer"><span class="ti">⏱️</span>Timer</button>
+  <button data-nav="mehr"><span class="ti">☰</span>Mehr</button>
+</nav>
+
+<input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="importFile" accept=".json,application/json" style="display:none">
+
+<script>
+'use strict';
+var APP_VERSION='1.0.0';
+/* ==================== KERN: Speicher, Format, Dialoge, Toast ==================== */
+var MC=(function(){
+  var bus=document.createElement('span');
+  function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+  function lsSet(key,val){ try{ localStorage.setItem(key,val); return true; }catch(e){ return false; } }
+  function loadJSON(key,fallback){
+    var raw=lsGet(key);
+    if(raw===null||raw===undefined) return fallback;
+    try{ var v=JSON.parse(raw); return (v===null||v===undefined)?fallback:v; }
+    catch(e){ lsSet(key+'_corrupt',raw); return fallback; }
+  }
+  function saveJSON(key,obj){ return lsSet(key,JSON.stringify(obj)); }
+  function num(v,fb){ var n=(typeof v==='number')?v:parseFloat(v); return Number.isFinite(n)?n:fb; }
+  function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmt(n,d){ d=d||0; return (Number.isFinite(n)?n:0).toLocaleString('de-CH',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function fmtDateCH(iso){ if(!iso) return ''; var p=String(iso).split('-'); return p.length===3?(p[2]+'.'+p[1]+'.'+p[0]):String(iso); }
+  function uid(prefix){ return (prefix||'id')+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7); }
+
+  /* ---- Toast ---- */
+  var toastEl=null,toastTimer=null;
+  function dismissToast(){ if(toastEl){ toastEl.remove(); toastEl=null; } if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; } }
+  function toast(msg,undoFn,undoLabel){
+    dismissToast();
+    toastEl=document.createElement('div'); toastEl.className='mc-toast'; toastEl.setAttribute('role','status');
+    var span=document.createElement('span'); span.textContent=msg; toastEl.appendChild(span);
+    if(undoFn){
+      var b=document.createElement('button'); b.type='button'; b.textContent=undoLabel||'Rückgängig';
+      b.addEventListener('click',function(){ dismissToast(); undoFn(); });
+      toastEl.appendChild(b);
+    }
+    document.body.appendChild(toastEl);
+    toastTimer=setTimeout(dismissToast,undoFn?9000:3500);
+  }
+
+  /* ---- Bestätigungs-Dialog ---- */
+  function confirmDlg(opts,onYes){
+    var old=document.getElementById('mcConfirm'); if(old) old.remove();
+    var dlg=document.createElement('dialog'); dlg.className='mc-dialog'; dlg.id='mcConfirm';
+    dlg.innerHTML='<form method="dialog">'+
+      '<div class="dlg-head"><h3>'+esc(opts.title||'Wirklich?')+'</h3></div>'+
+      '<div class="dlg-body"><p style="margin:0;font-size:14px">'+esc(opts.text||'')+'</p></div>'+
+      '<div class="dlg-foot"><button value="cancel" class="mc-btn mc-btn-ghost">Abbrechen</button>'+
+      '<button value="ok" class="mc-btn '+(opts.danger?'mc-btn-danger':'mc-btn-primary')+'">'+esc(opts.okLabel||'OK')+'</button></div></form>';
+    document.body.appendChild(dlg);
+    dlg.addEventListener('close',function(){ if(dlg.returnValue==='ok') onYes(); dlg.remove(); });
+    dlg.showModal();
+  }
+
+  /* ---- Formular-Sheet (Vollbild auf Mobile) ---- */
+  function openForm(cfg){
+    var old=document.getElementById('mcDialog'); if(old) old.remove();
+    var dlg=document.createElement('dialog'); dlg.className='mc-sheet'; dlg.id='mcDialog';
+    var form=document.createElement('form'); form.method='dialog'; form.noValidate=true;
+    var head=document.createElement('div'); head.className='dlg-head';
+    head.innerHTML='<div class="dh-text"><h3>'+esc(cfg.title)+'</h3>'+(cfg.subtitle?'<p>'+esc(cfg.subtitle)+'</p>':'')+'</div>';
+    var body=document.createElement('div'); body.className='dlg-body';
+    var foot=document.createElement('div'); foot.className='dlg-foot';
+    foot.innerHTML='<button value="cancel" type="button" class="mc-btn mc-btn-ghost" id="mcDlgCancel">Abbrechen</button>'+
+      '<button value="ok" type="submit" class="mc-btn mc-btn-primary">'+esc(cfg.okLabel||'Speichern')+'</button>';
+    form.appendChild(head); form.appendChild(body); form.appendChild(foot); dlg.appendChild(form);
+
+    var values=cfg.values||{};
+    var containers={};
+    var rootGrid=document.createElement('div'); rootGrid.className='fgrid2'; body.appendChild(rootGrid);
+    containers['']=rootGrid;
+    (cfg.groups||[]).forEach(function(g){
+      var det=document.createElement('details'); det.className='fgroup'; if(g.open) det.open=true;
+      det.innerHTML='<summary>'+esc(g.label)+'</summary>';
+      var gb=document.createElement('div'); gb.className='fgroup-body fgrid2'; det.appendChild(gb);
+      body.appendChild(det); containers[g.key]=gb;
+    });
+
+    var fieldEls={};
+    cfg.fields.forEach(function(f){
+      var wrap=document.createElement('div'); wrap.className='field'; wrap.dataset.key=f.key;
+      if(!f.half) wrap.classList.add('full');
+      var id='fld_'+f.key;
+      var lab=document.createElement('label'); lab.setAttribute('for',id); lab.textContent=f.label+(f.required?' *':''); wrap.appendChild(lab);
+      var v=values[f.key]; if(v===undefined||v===null) v='';
+      var input;
+      if(f.type==='textarea'){
+        input=document.createElement('textarea'); input.value=v;
+      } else if(f.type==='select'){
+        input=document.createElement('select');
+        var selOpts=(f.options||[]).slice();
+        if(String(v)!=='' && !selOpts.some(function(o){return String(o.v)===String(v);})){
+          selOpts.push({v:v,l:String(v)+' (nicht mehr vorhanden)'});
+        }
+        selOpts.forEach(function(o){
+          var opt=document.createElement('option'); opt.value=o.v; opt.textContent=o.l; if(String(v)===String(o.v)) opt.selected=true; input.appendChild(opt);
+        });
+      } else if(f.type==='pills'){
+        input=document.createElement('div'); input.className='mc-pills'; input.dataset.value=String(v);
+        (f.options||[]).forEach(function(o){
+          var l=document.createElement('label'); if(String(v)===String(o.v)) l.classList.add('checked');
+          var r=document.createElement('input'); r.type='radio'; r.name='pl_'+f.key; r.value=o.v; r.checked=(String(v)===String(o.v));
+          l.appendChild(r); l.appendChild(document.createTextNode(o.l));
+          l.addEventListener('click',function(ev){
+            ev.preventDefault();
+            input.dataset.value=o.v;
+            input.querySelectorAll('label').forEach(function(x){x.classList.remove('checked');});
+            l.classList.add('checked');
+          });
+          input.appendChild(l);
+        });
+      } else {
+        input=document.createElement('input');
+        input.type=f.type||'text';
+        if(f.type==='number'){ if(f.step!==undefined)input.step=f.step; if(f.min!==undefined)input.min=f.min; if(f.max!==undefined)input.max=f.max; input.inputMode='decimal'; }
+        input.value=v;
+        if(f.placeholder) input.placeholder=f.placeholder;
+        if(f.datalist && f.datalist.length){
+          var dlId='dl_'+f.key, dl=document.createElement('datalist'); dl.id=dlId;
+          f.datalist.forEach(function(o){ var op=document.createElement('option'); op.value=o; dl.appendChild(op); });
+          wrap.appendChild(dl); input.setAttribute('list',dlId);
+        }
+      }
+      input.id=id; wrap.appendChild(input);
+      if(f.help){ var h=document.createElement('span'); h.className='fhelp'; h.textContent=f.help; wrap.appendChild(h); }
+      var err=document.createElement('span'); err.className='ferror'; err.textContent=f.errorMsg||'Bitte ausfüllen'; wrap.appendChild(err);
+      fieldEls[f.key]={wrap:wrap,input:input,cfg:f};
+      (containers[f.group||'']||rootGrid).appendChild(wrap);
+    });
+
+    form.addEventListener('submit',function(ev){
+      ev.preventDefault();
+      var out={},ok=true;
+      cfg.fields.forEach(function(f){
+        var fe=fieldEls[f.key],val;
+        if(f.type==='pills') val=fe.input.dataset.value||'';
+        else val=fe.input.value;
+        if(typeof val==='string') val=val.trim();
+        if(f.required && val===''){ fe.wrap.classList.add('invalid'); ok=false; return; }
+        fe.wrap.classList.remove('invalid');
+        if(f.type==='number'){ out[f.key]=(val==='')?null:num(val,null); }
+        else out[f.key]=val;
+      });
+      if(!ok) return;
+      if(cfg.validate){
+        var verr=cfg.validate(out);
+        if(verr){
+          if(typeof verr==='object' && verr.key && fieldEls[verr.key]){
+            var vf=fieldEls[verr.key];
+            vf.wrap.querySelector('.ferror').textContent=verr.msg||'Ungültige Eingabe';
+            vf.wrap.classList.add('invalid');
+            /* Gruppe öffnen, falls das Feld in einer zugeklappten Gruppe liegt */
+            var grp=vf.wrap.closest('details'); if(grp) grp.open=true;
+            vf.input.focus && vf.input.focus();
+          } else {
+            toast(typeof verr==='string'?verr:'Eingabe ungültig');
+          }
+          return;
+        }
+      }
+      dlg.close(); dlg.remove();
+      cfg.onSave(out);
+    });
+    form.querySelector('#mcDlgCancel').addEventListener('click',function(){ dlg.close(); dlg.remove(); });
+    document.body.appendChild(dlg);
+    dlg.showModal();
+  }
+
+  return { bus:bus,loadJSON:loadJSON,saveJSON:saveJSON,lsGet:lsGet,lsSet:lsSet,num:num,esc:esc,fmt:fmt,
+           todayISO:todayISO,fmtDateCH:fmtDateCH,uid:uid,toast:toast,confirmDlg:confirmDlg,openForm:openForm };
+})();
+
+/* ==================== NAVIGATION (Tabbar + Unterseiten) ==================== */
+var Nav=(function(){
+  var views={}, current='home';
+  document.querySelectorAll('.view').forEach(function(v){ views[v.id.replace('view-','')]=v; });
+  var tabbar=document.getElementById('tabbar');
+  var topbar=document.getElementById('topbar');
+  var tbTitle=document.getElementById('tbTitle'), tbSub=document.getElementById('tbSub'), tbActions=document.getElementById('tbActions');
+  var tbBack=document.getElementById('tbBack');
+  var MAIN_TABS=['home','batches','rechner','timer','mehr'];
+  var actionRegistry={};
+
+  function setActions(list){
+    tbActions.innerHTML='';
+    (list||[]).forEach(function(a){
+      var b=document.createElement('button');
+      if(a.primary) b.className='primary';
+      b.textContent=a.label;
+      b.addEventListener('click',a.fn);
+      if(a.title) b.title=a.title;
+      tbActions.appendChild(b);
+    });
+  }
+  function show(id){
+    var v=views[id]; if(!v) return;
+    Object.keys(views).forEach(function(k){ views[k].classList.toggle('active',k===id); });
+    current=id;
+    tbTitle.innerHTML=v.dataset.title||'Pizza Mission';
+    tbSub.innerHTML=v.dataset.sub||'';
+    topbar.classList.toggle('can-back',!!v.dataset.back);
+    var tabId=MAIN_TABS.indexOf(id)>=0?id:'mehr';
+    tabbar.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active',b.dataset.nav===tabId); });
+    setActions(actionRegistry[id]);
+    window.scrollTo({top:0});
+    MC.bus.dispatchEvent(new CustomEvent('viewShown',{detail:{id:id}}));
+  }
+  tabbar.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-nav]'); if(b) show(b.dataset.nav);
+  });
+  tbBack.addEventListener('click',function(){
+    var v=views[current];
+    show((v&&v.dataset.back)||'mehr');
+  });
+  document.getElementById('view-mehr').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-go]'); if(b) show(b.dataset.go);
+  });
+  return { show:show, actions:function(id,list){ actionRegistry[id]=list; if(current===id) setActions(list); }, current:function(){return current;} };
+})();
+
+/* ==================== FOTO-DATENBANK (IndexedDB) ==================== */
+var PhotoDB=(function(){
+  var dbPromise=null;
+  function open(){
+    if(dbPromise) return dbPromise;
+    dbPromise=new Promise(function(resolve,reject){
+      if(!('indexedDB' in window)){ reject(new Error('IndexedDB nicht verfügbar')); return; }
+      var req=indexedDB.open('pizza-mission',1);
+      req.onupgradeneeded=function(){
+        var db=req.result;
+        if(!db.objectStoreNames.contains('photos')){
+          var st=db.createObjectStore('photos',{keyPath:'id'});
+          st.createIndex('batchId','batchId',{unique:false});
+        }
+      };
+      req.onsuccess=function(){ resolve(req.result); };
+      req.onerror=function(){ reject(req.error); };
+    });
+    return dbPromise;
+  }
+  function tx(mode,fn){
+    return open().then(function(db){
+      return new Promise(function(resolve,reject){
+        var t=db.transaction('photos',mode), st=t.objectStore('photos');
+        var out=fn(st);
+        t.oncomplete=function(){ resolve(out&&out.result!==undefined?out.result:undefined); };
+        t.onerror=function(){ reject(t.error); };
+      });
+    });
+  }
+  function add(photo){ return tx('readwrite',function(st){ st.put(photo); }); }
+  function del(id){ return tx('readwrite',function(st){ st.delete(id); }); }
+  function clearAll(){ return tx('readwrite',function(st){ st.clear(); }); }
+  function forBatch(batchId){
+    return open().then(function(db){
+      return new Promise(function(resolve,reject){
+        var t=db.transaction('photos','readonly');
+        var req=t.objectStore('photos').index('batchId').getAll(batchId);
+        req.onsuccess=function(){ resolve(req.result||[]); };
+        req.onerror=function(){ reject(req.error); };
+      });
+    });
+  }
+  function all(){
+    return open().then(function(db){
+      return new Promise(function(resolve,reject){
+        var req=db.transaction('photos','readonly').objectStore('photos').getAll();
+        req.onsuccess=function(){ resolve(req.result||[]); };
+        req.onerror=function(){ reject(req.error); };
+      });
+    });
+  }
+  return { add:add,del:del,forBatch:forBatch,all:all,clearAll:clearAll };
+})();
+
+/* ==================== BUSINESS: Stammdaten (identisch zum Desktop) ==================== */
+var investItems=[
+  ['anhaenger','Gebrauchter Verkaufsanhänger (3–4m, Hygieneausbau)','anibis / tutti / gastroinserate — hart verhandeln',12000],
+  ['ofen','Gas-Steinofen 2 Kammern (gebraucht/Occasion)','450°C+, Steinplatte',2800],
+  ['kuehlung','Kühlung (Kühlschrank/Kühltisch, falls nicht im Anhänger)','Occasion Gastro',1200],
+  ['knet','Teigknetmaschine (Spiral, 20–30L, Occasion)','für 60–120 Ballen/Batch',1200],
+  ['kleinequipment','Kleinequipment','Schieber, Teigboxen, Waage, Thermometer, Gastronorm',900],
+  ['gasinstallation','Gasinstallation: Abnahme + Material','Fachperson, Schläuche, Regler, 2× Flasche',800],
+  ['strom','Strom/Anschlüsse','CEE-Kabel, Verteiler, evtl. LED-Beleuchtung',400],
+  ['be_pruefung','Anhängerprüfung BE (falls nötig)','Fahrstunden + Prüfung',600],
+  ['bewilligungen','Bewilligungen, Gründung, Beratung','Meldungen, GastroSuisse-Leitlinie, Diverses',500],
+  ['versicherungen','Versicherungen Jahr 1','Betriebshaftpflicht + Anhänger-Kasko',1100],
+  ['branding','Branding: Logo + Anhänger-Folierung','Das wichtigste Marketing-Investment',1800],
+  ['website_kasse','Website + Kassensystem','1-Pager, SumUp/Zettle-Terminal',400],
+  ['wareneinsatz','Erst-Wareneinsatz + Verpackung','Mehl, Tomaten, Boxen für erste Events',700]
+];
+var fixItems=[
+  ['einstellplatz','Einstellplatz Anhänger (gedeckt)','Scheune/Halle mieten',150],
+  ['versicherung_mtl','Versicherungen (anteilig)','Haftpflicht + Kasko / 12',90],
+  ['software','Website, Software, Telefon','Hosting, Buchhaltungs-App',50],
+  ['unterhalt','Unterhalt & Rückstellung Reparaturen','Ofen, Reifen, Gasprüfung',100],
+  ['marketing','Marketing-Budget','Flyer, gelegentliche Ads',30]
+];
+var phases=[
+  {id:'p0', t:'Phase 0 · Fundament & Abklärungen', m:'Monat 1', tasks:[
+    ['inspektorat','Kantonales Lebensmittelinspektorat kontaktieren','Anforderungen an mobilen Betrieb schriftlich geben lassen — Kaufkriterien für den Anhänger!'],
+    ['fuehrerschein','Führerschein-Check','Wiegt der Wunsch-Anhänger >750kg? Dann BE-Prüfung anmelden.'],
+    ['zugfahrzeug','Zugfahrzeug klären','Eigenes Auto: Anhängelast im Fahrzeugausweis prüfen. Sonst: Occasion oder Mietlösung.'],
+    ['marke','Name & Marke festlegen','Verfügbarkeit prüfen: Instagram-Handle, Domain, zefix.ch (Firmennamen).'],
+    ['budget','Budget-Tab durcharbeiten','Eigene Zahlen eintragen, Finanzierungslücke klären (Erspartes reicht? Privatdarlehen?).']
+  ]},
+  {id:'p1', t:'Phase 1 · Fahrzeug & Ausrüstung', m:'Monat 1–3', tasks:[
+    ['suchabos','Gebrauchtmarkt-Suchabos einrichten','anibis, tutti, gastroinserate, mobile.de — Preisgefühl entwickeln (2–3 Wochen beobachten).'],
+    ['besichtigen','3+ Anhänger besichtigen','Mit der PDF-Checkliste aus dem Projektordner: Hygieneausbau, Gasdokumente, Feuchtschäden, Reifen/Auflaufbremse, Gewicht.'],
+    ['kaufen','Anhänger kaufen & einlösen','Kaufvertrag schriftlich, MFK-Prüfung, Nummernschild, Versicherung.'],
+    ['ofen','Gas-Steinofen beschaffen','Occasion Gastro-Händler oder ricardo — auf Steinplatte & 450°C+ achten.'],
+    ['gasabnahme','Gasinstallation abnehmen lassen','Fachperson beauftragen, Zertifikat ablegen (Veranstalter fragen danach).'],
+    ['equipment','Kühlung, Knetmaschine, Kleinequipment','Occasion-Gastro-Auflösungen sind Goldgruben.'],
+    ['probeaufbau','Probeaufbau zuhause','Kompletter Aufbau/Abbau auf Zeit, Arbeitshöhen & Abläufe optimieren.']
+  ]},
+  {id:'p2', t:'Phase 2 · Recht & Administration', m:'Monat 2–4 (parallel)', tasks:[
+    ['meldung','Meldung Lebensmittelbetrieb einreichen','Beim kantonalen Inspektorat, Bestätigung ablegen.'],
+    ['haccp','Selbstkontrollkonzept erstellen','GastroSuisse-Leitlinie kaufen, auf deinen Betrieb adaptieren, Temperatur-Logblätter vorbereiten.'],
+    ['ahv','Einzelfirma & AHV anmelden','Ausgleichskasse: Anmeldung Selbständigkeit im Nebenerwerb.'],
+    ['haftpflicht','Betriebshaftpflicht abschliessen','2–3 Offerten (Mobiliar, AXA, Helvetia...), Foodtruck explizit erwähnen.'],
+    ['hygieneschulung','Hygieneschulung auffrischen','Kurs oder Selbststudium dokumentieren — Teil der Selbstkontrolle.'],
+    ['konto','Geschäftskonto eröffnen','Trennung privat/geschäftlich von Tag 1 (z.B. kostenloses KMU-Konto).']
+  ]},
+  {id:'p3', t:'Phase 3 · Produkt & Prozess im Truck', m:'Monat 3–5', tasks:[
+    ['kalibrieren','Rezept auf Gasofen kalibrieren','Dein Playbook-Prozess: Batches im neuen Ofen backen, Ofenzonen dokumentieren.'],
+    ['karte','Karte finalisieren','4–6 Pizzen, Preise, Allergen-Liste, Lieferanten fixieren (Mehl, Tomaten, Fior di Latte).'],
+    ['mengen','Mengen-Workflow testen','80 Ballen-Batch produzieren: Knetzeiten, Boxen-Logistik, Kühlkette im Anhänger.'],
+    ['soft1','Soft-Launch Event 1 (privat)','Freunde/Familie, voller Ernstfall-Ablauf, Feedback-Bogen.'],
+    ['soft2','Soft-Launch Event 2 (privat)','Fehler aus Event 1 fixen, Foto/Video-Material produzieren.']
+  ]},
+  {id:'p4', t:'Phase 4 · Marketing & Akquise', m:'Monat 4–6 (parallel)', tasks:[
+    ['folierung','Logo & Folierung umsetzen','Anhänger beschriften lassen — vorher/nachher-Content!'],
+    ['social','Instagram & Google Business live','Ab 8–12 Wochen vor Eröffnung regelmässig posten.'],
+    ['website','1-Pager-Website mit Anfrageformular','Story + Standortkalender + Event-Buchung.'],
+    ['standorte','10 Standort-Bewerbungen verschicken','Märkte, Feste, Hofläden, Brauereien im Umkreis 30km.'],
+    ['firmen','20 Firmen anschreiben','KMU-Lunch-Angebot als PDF, persönlich nachfassen.'],
+    ['presse','Presse-Mitteilung vorbereiten','Lokalzeitungen 2 Wochen vor Eröffnung.']
+  ]},
+  {id:'p5', t:'Phase 5 · Eröffnung & Betrieb', m:'Monat 5–7', tasks:[
+    ['eroeffnung','Eröffnungsevent durchführen','Gut sichtbarer Standort, Aktionspreis, Presse & Instagram.'],
+    ['events5','Erste 5 bezahlte Events fahren','Nach jedem Event: 15-min-Review (Umsatz, Takt, Probleme) im Batch-Log-Stil.'],
+    ['zahlen','Zahlen monatlich in Rechner pflegen','Echte Werte statt Annahmen — Entscheidgrundlage für Vollzeit-Frage.'],
+    ['stammplatz','Stammplatz-Pipeline aufbauen','Ziel: 2 wiederkehrende Standorte bis Monat 9.'],
+    ['checkpoint','Vollzeit-Checkpoint nach 6 Monaten','Kriterium: 6 Monate ø CHF 4000+ Gewinn UND Anfragen-Überhang → Pensum reduzieren.']
+  ]}
+];
+
+/* ---- Migration v1 → v2 (identisch zum Desktop — läuft auch nach Import alter Backups) ---- */
+(function migrate(){
+  if(MC.loadJSON('ftk_version',null)===2) return;
+  var num=MC.num;
+  var oldB=MC.loadJSON('ftk_budget',null);
+  var oldInv=0,oldFix=0;
+  investItems.forEach(function(row,i){
+    var v=oldB?(oldB._v===2?(oldB.invest&&oldB.invest[row[0]]):oldB['i'+i]):undefined;
+    oldInv+=num(v,row[3]);
+  });
+  fixItems.forEach(function(row,i){
+    var v=oldB?(oldB._v===2?(oldB.fix&&oldB.fix[row[0]]):oldB['f'+i]):undefined;
+    oldFix+=num(v,row[3]);
+  });
+  var oldTot=oldInv+Math.round(oldInv*0.12/50)*50;
+  if(oldB && oldB._v!==2){
+    var invest={},fix={};
+    investItems.forEach(function(row,i){ if(oldB['i'+i]!==undefined) invest[row[0]]=num(oldB['i'+i],row[3]); });
+    fixItems.forEach(function(row,i){ if(oldB['f'+i]!==undefined) fix[row[0]]=num(oldB['f'+i],row[3]); });
+    MC.saveJSON('ftk_budget',{_v:2,invest:invest,fix:fix});
+  }
+  var oldT=MC.loadJSON('ftk_tasks',null);
+  if(oldT && oldT._v!==2){
+    var done={};
+    phases.forEach(function(ph,pi){ ph.tasks.forEach(function(t,ti){ if(oldT[pi+'_'+ti]) done[ph.id+'.'+t[0]]=true; }); });
+    MC.saveJSON('ftk_tasks',{_v:2,done:done});
+  }
+  var oldC=MC.loadJSON('ftk_calc',null);
+  if(oldC && oldC._v!==2){
+    var values={},touched=[];
+    Object.keys(oldC).forEach(function(k){ if(k.charAt(0)==='r'){ values[k]=num(oldC[k],0);
+      if(k!=='rInvest'&&k!=='rFix') touched.push(k); } });
+    if(oldC.rInvest!==undefined && Math.abs(num(oldC.rInvest,oldTot)-oldTot)>0.5) touched.push('rInvest');
+    if(oldC.rFix!==undefined && Math.abs(num(oldC.rFix,oldFix)-oldFix)>0.5) touched.push('rFix');
+    MC.saveJSON('ftk_calc',{_v:2,values:values,touched:touched});
+  }
+  MC.saveJSON('ftk_version',2);
+})();
+
+/* ==================== PIZZA-SYSTEM: Seed (identisch zum Desktop) ==================== */
+function seedData(){
+  return {
+    schemaVersion:1,
+    savedAt:new Date().toISOString(),
+    settings:{ sellPrice:18, batchSort:'desc', lastBackup:null },
+    dough:{ balls:3, ballWeight:290, hydration:70, salt:2.8, yeast:0.5 },
+    batches:[
+      { id:'BT-011', date:'2026-07-23', flour:'Caputo Pizzeria/Nuvola', balls:3, ballWeight:275, system:'44h',
+        hydration:70, saltPct:2.8, yeastG:1, waterTemp:8, roomTemp:26, doughTemp:24, fridgeTemp:6, kneadMin:10,
+        fridgeH:44, roomH:4, stretchFold:'1× nach 20 Min (nächstes Mal geplant)', autolyse:'Nein',
+        stoneFront:450, stoneMid:485, stoneBack:505, flamePre:'Vollgas', flameBake:'Minimum', firstTurnS:'20–25', turnIntervalS:'10–15', bakeS:120,
+        sauceG:90, mozzG:'77–80', semolaNote:'Weniger verwenden',
+        bottomNote:'Optisch sehr gut, geschmacklich zu verbrannt', rimNote:'Luftig, darf noch höher werden',
+        crisp:6, bitterness:6, openScore:6, taste:7, result:7, sellable:'nein',
+        nextChange:'Playbook: weniger Semola, tiefere Steintemp. | 24h-Datei (nachträglich): Hefe auf 0.3% erhöhen',
+        note:'Hauptursache Bitterkeit: verbrannte Semola + zu heisser Stein. Steintemperatur daraufhin gesenkt. KORRIGIERT 30.07.2026: Kühlschrank real 6–8 °C statt angenommener 2.5 °C.' },
+      { id:'BT-012', date:'2026-07-27', flour:'Caputo Pizzeria/Nuvola', balls:3, ballWeight:260, system:'44h',
+        hydration:70, saltPct:2.8, yeastG:1.1, waterTemp:13, roomTemp:26, doughTemp:24, fridgeTemp:6, kneadMin:12,
+        fridgeH:46, roomH:2, stretchFold:'1× nach 20 Min (einzige geänderte Variable)', autolyse:'Nein',
+        stoneFront:null, stoneMid:null, stoneBack:null, flamePre:'', flameBake:'', firstTurnS:'', turnIntervalS:'', bakeS:120,
+        sauceG:null, mozzG:'', semolaNote:'',
+        bottomNote:'Ok', rimNote:'Ok',
+        crisp:null, bitterness:3, openScore:6, taste:7, result:7, sellable:'teilweise',
+        nextChange:'Von 44h- auf 24h-System wechseln + Mischreihenfolge anpassen',
+        note:'Abweichung vom Standard (260 statt 275 g) — als historischer Datenpunkt belassen. Teig wieder schwierig auszubreiten. ERGÄNZT 30.07.2026; restliche Felder offen.' },
+      { id:'BT-013', date:'2026-08-03', flour:'Caputo Rot', balls:3, ballWeight:290, system:'24h',
+        hydration:70, saltPct:2.8, yeastG:2.5, waterTemp:11, roomTemp:26, doughTemp:24, fridgeTemp:4, kneadMin:11,
+        fridgeH:22, roomH:3, stretchFold:'', autolyse:'',
+        stoneFront:null, stoneMid:null, stoneBack:null, flamePre:'', flameBake:'', firstTurnS:'', turnIntervalS:'', bakeS:null,
+        sauceG:null, mozzG:'', semolaNote:'',
+        bottomNote:'OK', rimNote:'OK',
+        crisp:6, bitterness:0, openScore:null, taste:null, result:8, sellable:'ja',
+        nextChange:'Länger auskneten (mit Eis kühlen), Raumgare alle 30 Min prüfen',
+        note:'Erster 24h-System-Batch. Nicht genug ausgeknetet, weil die Teigtemperatur schon zu hoch war. Raumgare war zu lang — künftig ~2 h anpeilen.' }
+    ],
+    processSteps:[
+      {id:'ps01', time:'T−24h', title:'Wasser vorbereiten', detail:'Wasser kalt, ca. 8 °C. Zielteigtemperatur 22–24 °C.'},
+      {id:'ps02', time:'T−24h', title:'Mehl vorbereiten', detail:'Ganzes Mehl in Teigkneter 1–2 Min langsam laufen lassen, um Proteine zu aktivieren.'},
+      {id:'ps03', time:'T−24h', title:'Hefe auflösen', detail:'Frischhefe in etwas kaltem Wasser auflösen, zum Mehl geben.'},
+      {id:'ps04', time:'T−24h', title:'Anmischen', detail:'Ca. 60–70 % des Wassers einarbeiten, dann Rest schrittweise.'},
+      {id:'ps05', time:'T−24h', title:'Salz', detail:'Erst zugeben, wenn das ganze Mehl gebunden ist.'},
+      {id:'ps06', time:'T−24h', title:'Kneten', detail:'3–4 Min langsam, dann 6–8 Min schneller. Fenstertest.'},
+      {id:'ps07', time:'T−23h40', title:'Ruhe', detail:'Ca. 20 Min abgedeckt ruhen lassen.'},
+      {id:'ps08', time:'T−23h20', title:'Stretch & Fold', detail:'Einmal kontrolliert falten, danach 20–30 Min Ruhe.'},
+      {id:'ps09', time:'T−23h', title:'Ballen formen', detail:'290 g pro Ballen, straff formen, in Ballenbox.'},
+      {id:'ps10', time:'T−22h45', title:'Kühlschrank', detail:'Real 6–8 °C. Ca. 19–20 Std kühlen.'},
+      {id:'ps11', time:'T−3h', title:'Raumgare', detail:'Ballen raus, 2.5–3.5 Std bei Raumtemperatur (bei 290 g eher länger).'},
+      {id:'ps12', time:'T−30min', title:'Ofen aufheizen', detail:'Ooni Koda 12 auf Vollgas aufheizen.'},
+      {id:'ps13', time:'T−0', title:'Ofen einstellen', detail:'Vor dem ersten Teig komplett auf Minimum regulieren, dann starten.'},
+      {id:'ps14', time:'T−0', title:'Ausbreiten', detail:'Rand 2–2.5 cm nicht ausdrücken, Mitte bewusst dicker lassen, Ziel 30 cm.'},
+      {id:'ps15', time:'T−0', title:'Belegen', detail:'Sauce ca. 85 g, Mozzarella ca. 80 g gut abgetropft, zügig arbeiten.'},
+      {id:'ps16', time:'T−0', title:'Backen', detail:'Ab dem 2. Teigling Ofen vor Einschuss auf Minimum. Erste Drehung nach 20–25s, dann alle 10–15s.'},
+      {id:'ps17', time:'T−0', title:'Zwischen Pizzen', detail:'Stein von Semola-Resten reinigen — Hauptursache der Bitterkeit.'}
+    ],
+    ingredients:[
+      {id:'mehl', name:'Caputo Nuvola', price:3.30, unit:1000, qty:167, role:'mehl'},
+      {id:'hefe', name:'Frischhefe', price:0.25, unit:42, qty:0.85, role:'hefe'},
+      {id:'salz', name:'Meersalz (Sale Marino Fino)', price:1.90, unit:1000, qty:4.7, role:'salz'},
+      {id:'wasser', name:'Leitungswasser', price:0, unit:1000, qty:117, role:'wasser'},
+      {id:'sanmarzano', name:'San Marzano Tomaten', price:2.90, unit:400, qty:85},
+      {id:'mozzarella', name:'Mozzarella', price:2.25, unit:400, qty:80},
+      {id:'parmesan', name:'Parmesan (Parmigiano Reggiano DOP)', price:7.35, unit:250, qty:5},
+      {id:'basilikum', name:'Basilikum', price:2.20, unit:20, qty:2},
+      {id:'olivenoel', name:'Olivenöl', price:9.95, unit:1000, qty:5},
+      {id:'semola', name:'Semola', price:2.95, unit:1000, qty:10}
+    ],
+    extras:[
+      {id:'gas', name:'Gas pro Pizza', price:0, note:'Schätzung — messen sobald Ofen im Betrieb'},
+      {id:'strom', name:'Strom / Reinigung', price:0, note:'Schätzung'},
+      {id:'verpackung', name:'Verpackung (Box, Serviette)', price:0, note:'Schätzung'}
+    ],
+    trouble:[
+      {id:'t01', symptom:'Boden verbrannt / bitter', causes:'Steintemperatur zu hoch; zu weit hinten gebacken; zu viel Semola; zu lange Backzeit', checks:'Temp. vorne/Mitte/hinten; Flammenstufe; Backzeit; Semola-Menge', now:'Stein abkühlen lassen; weiter vorne backen; Semola abschütteln; Flamme früher reduzieren', later:'Zieltemperatur standardisieren; Temperaturprofil dokumentieren; Position im Ofen standardisieren'},
+      {id:'t02', symptom:'Pizza klebt auf Schaufel', causes:'Zu wenig Semola; zu lange Belegzeit; zu feuchte Sauce/Mozzarella; zu klebriger Teig', checks:'Zeit Ausziehen→Einschiessen; Beweglichkeit auf Schaufel; Wasserverlust Mozzarella', now:'Sofort einschiessen; Schaufel rütteln; weniger Feuchtigkeit', later:'Arbeitsablauf beschleunigen; Fior di Latte testen; Handling verbessern'},
+      {id:'t03', symptom:'Mitte reisst / Loch', causes:'Zu viel Druck; mehrfaches Nacharbeiten; vorgeschädigte Stelle; zu dünn ausgezogen', checks:'Handposition; Druckverteilung; Dickengleichmässigkeit', now:'Früher stoppen; mehr Teig in der Mitte belassen', later:'Techniktraining; Videoanalyse; standardisierte Handbewegungen'},
+      {id:'t04', symptom:'Pizza bleibt klein', causes:'Zu vorsichtiges Öffnen; Angst vor Löchern; zu wenig Teigentspannung', checks:'Reifegrad; Rückfederung; Elastizität', now:'Teig länger entspannen lassen; ruhiger arbeiten', later:'Ausziehtechnik standardisieren; Videovergleich mit Profis'},
+      {id:'t05', symptom:'Rand bleibt flach', causes:'Luft aus Rand gedrückt; Untergare; Stein zu kalt; Glutenentwicklung unzureichend', checks:'Fingertest; Randbeobachtung beim Öffnen; Steintemperatur', now:'Rand nicht berühren; Teigreife prüfen', later:'Stretch & Fold testen; Temperaturprofil optimieren'},
+      {id:'t06', symptom:'Pizza wird oval', causes:'Ungleichmässiges Öffnen; einseitiges Ziehen; hektische Bewegungen', checks:'Drehbewegungen; Handposition; Arbeitsrichtung', now:'Langsamer arbeiten; häufiger drehen', later:'Technik standardisieren; Videoanalyse'},
+      {id:'t07', symptom:'Mitte zu feucht', causes:'Mozzarella zu feucht; zu viel Sauce; Mitte zu dünn; Backtemperatur nicht optimal', checks:'Käsemenge; Saucemenge; Backzeit; Bodendicke', now:'Käse besser abtropfen; Sauce reduzieren', later:'Fior di Latte testen; Sauce standardisieren'},
+      {id:'t08', symptom:'Teig extrem klebrig', causes:'70% Hydration; längere Gare; hohe Teigreife', checks:'Gare; Raumtemperatur; Kühlschranktemperatur', now:'Mehr Semola; schneller arbeiten', later:'Technik verbessern; Stretch & Fold testen (NICHT Hydration senken — bewusst verworfen)'},
+      {id:'t09', symptom:'Ballen werden flach (nach Kaltgare)', causes:'Normale Fermentation; Spannungsverlust; ggf. leichte Übergare (Einzelfall)', checks:'Fingertest; Elastizität; Volumen', now:'Nicht nach Optik allein urteilen', later:'Gare stets anhand Gesamtzustand beurteilen, nicht nach Uhr'},
+      {id:'t10', symptom:'Unsicherheit bei der Gare', causes:'Reifegrad schwer einzuschätzen', checks:'Fingertest + Volumen + Oberfläche + Klebrigkeit + Elastizität + Temperatur + Öffnungsverhalten gemeinsam', now:'Nie nach einem einzelnen Indikator entscheiden', later:'Multi-Indikator-Checkliste konsequent anwenden'}
+    ],
+    roadmap:[
+      {id:'r01', prio:1, topic:'Steintemperatur-Sweet-Spot', hyp:'440–460/480–490/500–510°C reduziert Bitterkeit ohne Ofentrieb zu verlieren', status:'test', statusNote:'Laufend (nach BT-011)', next:'BT-012+ mit reduzierter Zieltemperatur nachverfolgen'},
+      {id:'r02', prio:1, topic:'24h- vs 44h-System', hyp:'Wärmerer Kühlschrank (6–8°C) ermöglicht kürzere, gleichwertige Gare ohne Qualitätsverlust', status:'test', statusNote:'Aktiv im Test', next:'BT-014+ im 24h-System auswerten und mit BT-011/012/013 vergleichen'},
+      {id:'r03', prio:1, topic:'Fior di Latte', hyp:'Weniger Wasseranteil, intensiverer Geschmack, besseres Schmelzverhalten als M-Budget Mozzarella', status:'offen', statusNote:'', next:'Blindtest gegen aktuellen Standard'},
+      {id:'r04', prio:2, topic:'Ballengewicht-Feintuning', hyp:'290 g evtl. zu gross, Rücksetzung auf ~280 g wahrscheinlich', status:'test', statusNote:'Im Test seit 30.07.2026', next:'Nach mehreren 24h-Batches mit 290 g evaluieren, ggf. 280 g gegentesten'},
+      {id:'r05', prio:2, topic:'Caputo Nuvola Super', hyp:'Mehr Ofentrieb, noch luftigerer Cornicione', status:'offen', statusNote:'Bezugsquelle fehlt', next:'Beschaffen, dann A/B-Test'},
+      {id:'r06', prio:2, topic:'Stretch & Fold (1×)', hyp:'Verbessert Cornicione messbar', status:'integriert', statusNote:'Fest integriert in 24h-Prozess (ursprünglich in BT-013 getestet)', next:'—'},
+      {id:'r07', prio:2, topic:'Ausziehtechnik', hyp:'Technik, nicht Rezept, ist Hauptursache für ovale Form / Löcher / zu kleine Pizzen', status:'test', statusNote:'Laufend', next:'Videoanalyse der Handbewegungen'},
+      {id:'r08', prio:3, topic:'San-Marzano-Vergleich', hyp:'Mutti / Solania / Gustarosso / La Fiammante ggf. besser als Longobardi', status:'offen', statusNote:'', next:'Blindverkostung'},
+      {id:'r09', prio:3, topic:'Olivenöl-Vergleich', hyp:'Hochwertigeres Öl schmeckt auf fertiger Pizza nach', status:'offen', statusNote:'', next:'Blindverkostung'},
+      {id:'r10', prio:3, topic:'Teigtemperatur nach Kneten als Fixmesspunkt', hyp:'Konsistente Messung verbessert Reproduzierbarkeit', status:'test', statusNote:'In Einführung', next:'Ab BT-011 bei jedem Batch dokumentieren'},
+      {id:'r11', prio:4, topic:'Parmesan-Reifegrade', hyp:'Unterschiedliche Reifung beeinflusst Geschmack', status:'offen', statusNote:'Nicht begonnen', next:'—'},
+      {id:'r12', prio:4, topic:'Basilikum-Eigenanbau', hyp:'Kosteneinsparung + Frische für Foodtruck-Phase', status:'offen', statusNote:'Nicht begonnen', next:'—'}
+    ],
+    decisions:[
+      {id:'d01', dateISO:null, dateLabel:'Frühe Entwicklung', decision:'70% Hydration als Standard', why:'Grösstes Potenzial für luftigen Cornicione; Klebrigkeit bewusst akzeptiert', status:'Aktiv', batchRef:''},
+      {id:'d02', dateISO:null, dateLabel:'Frühe Entwicklung', decision:'Caputo Nuvola als Standardmehl', why:'Hohe Wasseraufnahme, starke Glutenstruktur, passt zu 70% Hydration', status:'Aktiv', batchRef:''},
+      {id:'d03', dateISO:null, dateLabel:'Frühe Entwicklung', decision:'Trockenhefe verworfen', why:'Geringere Aktivität, schlechtere Teigentwicklung, weniger Volumen', status:'Verworfen', batchRef:''},
+      {id:'d04', dateISO:null, dateLabel:'Frühe Entwicklung', decision:'Feste Raumgare-Zeit (3–3.5h) verworfen', why:'Teig nach 44h Kaltgare oft weiter entwickelt als erwartet', status:'Ersetzt durch zustandsabhängige Beurteilung', batchRef:''},
+      {id:'d05', dateISO:null, dateLabel:'Frühe Entwicklung', decision:'Kaltgare nicht verkürzt trotz Verdacht auf Übergare', why:'Ballen besassen trotz flacherer Optik weiterhin ausreichend Struktur', status:'Bestätigt (44h blieb damals Standard)', batchRef:''},
+      {id:'d06', dateISO:'2026-07-23', dateLabel:'', decision:'Stein-Zieltemperatur gesenkt', why:'Gemessene Ist-Werte 480/510/525 °C führten zu deutlicher Bitterkeit (+ verbrannte Semola). Neue Zielwerte: 440–460 / 480–490 / 500–510 °C.', status:'In Testphase — nächster Batch prüft Wirkung', batchRef:'BT-011'},
+      {id:'d07', dateISO:'2026-07-29', dateLabel:'', decision:'Ballengewicht-Standard korrigiert auf 275 g', why:'Nutzerkorrektur — vorherige Dokumentation (260 g) war fehlerhaft', status:'Aktiv, verbindlich (bis 290-g-Test entschieden ist)', batchRef:''},
+      {id:'d08', dateISO:'2026-07-30', dateLabel:'', decision:'Kühlschrank real gemessen: 6–8°C statt angenommenen 2–3°C', why:'Erklärt frühere Abweichungen bei Gare-Geschwindigkeit; historische Batch-Werte rückwirkend korrigiert', status:'Aktiv', batchRef:''},
+      {id:'d09', dateISO:'2026-07-30', dateLabel:'', decision:'Wechsel von 44h- auf 24h-Kaltgare (testweise)', why:'Wärmerer Kühlschrank ermöglicht kürzere, evtl. gleichwertige Gare; neuer Prozess T-24h bis T-0 definiert', status:'In Testphase', batchRef:''},
+      {id:'d10', dateISO:'2026-07-30', dateLabel:'', decision:'Ballengewicht auf 290 g gesetzt (Test)', why:'Nutzervorgabe; Erwartung evtl. Rücksetzung auf ~280 g nach weiteren Tests', status:'In Testphase', batchRef:''},
+      {id:'d11', dateISO:'2026-07-30', dateLabel:'', decision:'Playbook v2 + 24h-System zu v3 kombiniert', why:'Beide Systeme ergänzten sich (Rechner, Prozessablauf, Deckungsbeitrag), teils widersprüchliche historische Batches — Konflikte aufgelöst', status:'Umgesetzt', batchRef:''},
+      {id:'d12', dateISO:null, dateLabel:'Laufend', decision:'Nur 1 Variable pro Batch ändern', why:'Sonst keine saubere Ursache-Wirkung-Zuordnung möglich — dauerhafte Grundregel', status:'Dauerhafte Grundregel', batchRef:''},
+      {id:'d13', dateISO:'2026-08-08', dateLabel:'', decision:'Kostenkalkulation an 290-g-Ballen und Prozess angeglichen', why:'Mehl/Wasser/Salz/Hefe-Mengen aus dem Rezept abgeleitet (vorher 275-g-Basis), Sauce auf 85 g gemäss Prozess, Mozzarella auf 80 g vereinheitlicht. Zutaten-Total dadurch ~CHF 2.08 statt 2.09. Zusätzlich Gas/Strom/Verpackung als eigene Positionen (CHF 0, Schätzung) ergänzt.', status:'Umgesetzt (beim Mission-Control-Umbau)', batchRef:''}
+    ]
+  };
+}
+
+/* ---- Laden & Speichern ---- */
+var data=MC.loadJSON('ftk_pizza',null);
+if(!data || !data.schemaVersion){
+  if(data){ MC.lsSet('ftk_pizza_pre_reseed',MC.lsGet('ftk_pizza')); }
+  data=seedData(); MC.saveJSON('ftk_pizza',data);
+}
+['batches','processSteps','ingredients','extras','trouble','roadmap','decisions'].forEach(function(k){ if(!Array.isArray(data[k])) data[k]=seedData()[k]; });
+data.settings=Object.assign({},seedData().settings,(data.settings&&typeof data.settings==='object')?data.settings:{});
+data.dough=Object.assign({},seedData().dough,(data.dough&&typeof data.dough==='object')?data.dough:{});
+if(!Array.isArray(data.timers)) data.timers=[];
+
+var saveWarned=false;
+function save(){
+  data.savedAt=new Date().toISOString();
+  var ok=MC.saveJSON('ftk_pizza',data);
+  if(!ok && !saveWarned){
+    saveWarned=true;
+    MC.toast('⚠️ Speichern fehlgeschlagen — Browser-Speicher blockiert oder voll. Bitte sofort ein Backup erstellen!');
+  }
+  updateKpis();
+}
+/* ==================== BUSINESS: Budget, Fahrplan, Wirtschaftlichkeit ==================== */
+(function(){
+var fmt=MC.fmt,num=MC.num,esc=MC.esc;
+
+/* ---- Budget ---- */
+var budgetState=(function(){
+  var saved=MC.loadJSON('ftk_budget',{}); var st={invest:{},fix:{}};
+  investItems.forEach(function(row){ st.invest[row[0]]=num(saved.invest&&saved.invest[row[0]],row[3]); });
+  fixItems.forEach(function(row){ st.fix[row[0]]=num(saved.fix&&saved.fix[row[0]],row[3]); });
+  return st;
+})();
+function saveBudget(){ MC.saveJSON('ftk_budget',{_v:2,invest:budgetState.invest,fix:budgetState.fix}); }
+
+function buildBudget(){
+  var ic=document.getElementById('investCard'), fc=document.getElementById('fixCard');
+  var html='';
+  investItems.forEach(function(row){
+    html+='<div class="edit-row"><span class="er-label">'+esc(row[1])+'<small>'+esc(row[2])+'</small></span>'+
+      '<input type="number" data-grp="invest" data-k="'+row[0]+'" class="b-in" value="'+budgetState.invest[row[0]]+'" step="50" min="0" inputmode="numeric" aria-label="CHF für '+esc(row[1])+'"></div>';
+  });
+  html+='<div class="edit-row"><span class="er-label">Reserve / Unvorhergesehenes<small>12 % der Summe</small></span><span class="er-val" id="bReserve" style="font-family:var(--font-mono)">–</span></div>'+
+        '<div class="edit-row total"><span class="er-label">Total Investition</span><span class="er-val" id="bTotal">–</span></div>';
+  ic.innerHTML=html;
+  html='';
+  fixItems.forEach(function(row){
+    html+='<div class="edit-row"><span class="er-label">'+esc(row[1])+'<small>'+esc(row[2])+'</small></span>'+
+      '<input type="number" data-grp="fix" data-k="'+row[0]+'" class="b-in" value="'+budgetState.fix[row[0]]+'" step="10" min="0" inputmode="numeric" aria-label="CHF pro Monat für '+esc(row[1])+'"></div>';
+  });
+  html+='<div class="edit-row total"><span class="er-label">Total Fixkosten / Monat</span><span class="er-val" id="bFixTotal">–</span></div>';
+  fc.innerHTML=html;
+  document.querySelectorAll('#view-budget .b-in').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      if(inp.value.trim()===''){ return; }
+      var v=num(inp.value,null); if(v===null||v<0) return;
+      budgetState[inp.dataset.grp][inp.dataset.k]=v;
+      saveBudget(); recalcBudget();
+    });
+    inp.addEventListener('blur',function(){
+      if(inp.value.trim()===''){ inp.value=budgetState[inp.dataset.grp][inp.dataset.k]; }
+    });
+  });
+  recalcBudget();
+}
+function budgetTotals(){
+  var inv=0,fix=0;
+  investItems.forEach(function(row){ inv+=budgetState.invest[row[0]]; });
+  fixItems.forEach(function(row){ fix+=budgetState.fix[row[0]]; });
+  var res=Math.round(inv*0.12/50)*50;
+  return {inv:inv,res:res,tot:inv+res,fix:fix};
+}
+function recalcBudget(){
+  var t=budgetTotals();
+  document.getElementById('bReserve').textContent='CHF '+fmt(t.res);
+  document.getElementById('bTotal').textContent='CHF '+fmt(t.tot);
+  document.getElementById('bFixTotal').textContent='CHF '+fmt(t.fix);
+  document.getElementById('kpiBudget').textContent='CHF '+fmt(t.tot);
+  if(calcTouched.indexOf('rInvest')<0){ calcValues.rInvest=t.tot; document.getElementById('rInvest').value=t.tot; }
+  if(calcTouched.indexOf('rFix')<0){ calcValues.rFix=t.fix; document.getElementById('rFix').value=t.fix; }
+  recalc();
+}
+document.getElementById('budgetResetBtn').addEventListener('click',function(){
+  MC.confirmDlg({title:'Budget zurücksetzen?',text:'Alle Beträge werden auf die Standardwerte zurückgesetzt. Deine eigenen Zahlen gehen verloren.',okLabel:'Zurücksetzen',danger:true},function(){
+    investItems.forEach(function(row){ budgetState.invest[row[0]]=row[3]; });
+    fixItems.forEach(function(row){ budgetState.fix[row[0]]=row[3]; });
+    saveBudget(); buildBudget(); MC.toast('Budget auf Standardwerte zurückgesetzt');
+  });
+});
+
+/* ---- Fahrplan ---- */
+function taskStore(){ var s=MC.loadJSON('ftk_tasks',{}); return (s&&s.done)?s.done:{}; }
+function buildPhases(){
+  var done=taskStore();
+  var wrap=document.getElementById('phases'); wrap.innerHTML='';
+  phases.forEach(function(ph,pi){
+    var el=document.createElement('div'); el.className='phase'+(pi===0?' open':'');
+    var tasksHtml='';
+    ph.tasks.forEach(function(t){
+      var k=ph.id+'.'+t[0], c=done[k]?'checked':'';
+      tasksHtml+='<label class="task '+(done[k]?'done':'')+'"><input type="checkbox" data-k="'+k+'" '+c+' aria-label="'+esc(t[1])+'"><span><span class="t-title">'+esc(t[1])+'</span><br><span class="t-desc">'+esc(t[2])+'</span></span></label>';
+    });
+    el.innerHTML='<button type="button" class="phase-head" aria-expanded="'+(pi===0?'true':'false')+'"><h3>'+esc(ph.t)+'</h3>'+
+      '<div style="text-align:right"><span class="meta">'+esc(ph.m)+'</span><div class="progressbar"><div data-p="'+pi+'" style="width:0%"></div></div></div></button>'+
+      '<div class="phase-body">'+tasksHtml+'</div>';
+    wrap.appendChild(el);
+    el.querySelector('.phase-head').addEventListener('click',function(){
+      el.classList.toggle('open');
+      this.setAttribute('aria-expanded',el.classList.contains('open')?'true':'false');
+    });
+  });
+  wrap.addEventListener('change',function(e){
+    if(e.target.type!=='checkbox') return;
+    var d=taskStore();
+    if(e.target.checked) d[e.target.dataset.k]=true; else delete d[e.target.dataset.k];
+    MC.saveJSON('ftk_tasks',{_v:2,done:d});
+    e.target.closest('.task').classList.toggle('done',e.target.checked);
+    updateProgress();
+  });
+  updateProgress();
+}
+function updateProgress(){
+  var d=taskStore(),total=0;
+  phases.forEach(function(ph,pi){
+    var pd=0;
+    ph.tasks.forEach(function(t){ if(d[ph.id+'.'+t[0]]) pd++; });
+    total+=pd;
+    var bar=document.querySelector('#phases [data-p="'+pi+'"]');
+    if(bar) bar.style.width=(pd/ph.tasks.length*100)+'%';
+  });
+  var all=phases.reduce(function(s,p){return s+p.tasks.length;},0);
+  document.getElementById('kpiProgress').textContent=Math.round(total/all*100)+' %';
+  document.getElementById('kpiProgressSub').textContent=total+' von '+all+' Aufgaben erledigt';
+}
+
+/* ---- Wirtschaftlichkeitsrechner ---- */
+var rMeta=[
+  ['rEvents','Events pro Monat','',1],
+  ['rPizzas','Verkaufte Pizzen pro Event','',5],
+  ['rPrice','Ø Verkaufspreis','CHF',0.5],
+  ['rCogs','Wareneinsatz/Pizza inkl. Gas+Box','CHF',0.1],
+  ['rFee','Standgebühr pro Event','CHF',10],
+  ['rTravel','Fahrt/Diesel pro Event','CHF',5],
+  ['rHelper','Helferlohn pro Event','CHF',10],
+  ['rFix','Fixkosten pro Monat','CHF',10],
+  ['rInvest','Investition total','CHF',100]
+];
+var rIds=rMeta.map(function(r){return r[0];});
+var rDefaults={rEvents:4,rPizzas:80,rPrice:18,rCogs:2.80,rFee:150,rTravel:40,rHelper:150,rFix:420,rInvest:27350};
+var calcSaved=MC.loadJSON('ftk_calc',{});
+var calcValues={},calcTouched=(calcSaved&&calcSaved.touched)?calcSaved.touched.slice():[];
+rIds.forEach(function(id){ calcValues[id]=num(calcSaved.values&&calcSaved.values[id],rDefaults[id]); });
+
+function saveCalc(){ MC.saveJSON('ftk_calc',{_v:2,values:calcValues,touched:calcTouched}); }
+function recalc(){
+  var v=calcValues;
+  var rev=v.rEvents*v.rPizzas*v.rPrice;
+  var cogs=v.rEvents*v.rPizzas*v.rCogs;
+  var evc=v.rEvents*(v.rFee+v.rTravel+v.rHelper);
+  var profit=rev-cogs-evc-v.rFix;
+  var pizzas=v.rEvents*v.rPizzas;
+  document.getElementById('oRevenue').textContent='CHF '+fmt(rev);
+  document.getElementById('oCogs').textContent='– CHF '+fmt(cogs);
+  document.getElementById('oEventCosts').textContent='– CHF '+fmt(evc);
+  document.getElementById('oFix').textContent='– CHF '+fmt(v.rFix);
+  document.getElementById('oProfit').textContent='CHF '+fmt(profit);
+  document.getElementById('oPerEvent').textContent=v.rEvents?('CHF '+fmt(profit/v.rEvents)):'–';
+  document.getElementById('oPerPizza').textContent=pizzas?('CHF '+fmt(profit/pizzas,2)):'–';
+  document.getElementById('kpiProfit').textContent='CHF '+fmt(profit);
+  var be=profit>0?Math.ceil(v.rInvest/profit):null;
+  document.getElementById('oBreakeven').textContent=be?(be+' Monate'):'—';
+  document.getElementById('oBreakevenSub').textContent=be?('Bei CHF '+fmt(profit)+' Gewinn/Monat ist die Investition von CHF '+fmt(v.rInvest)+' nach '+be+' Monaten zurückverdient.'):'Mit diesen Werten entsteht kein Gewinn — Preis, Menge oder Kosten anpassen.';
+  document.getElementById('kpiBreakeven').textContent=be?('Investition zurück nach ~'+be+' Monaten'):'noch kein Gewinn';
+  saveCalc();
+}
+function buildCalc(){
+  var card=document.getElementById('calcCard'); var html='';
+  rMeta.forEach(function(r){
+    html+='<div class="edit-row"><span class="er-label">'+esc(r[1])+(r[2]?'<small>'+r[2]+'</small>':'')+'</span>'+
+      '<input type="number" id="'+r[0]+'" step="'+r[3]+'" min="0" inputmode="decimal" aria-label="'+esc(r[1])+'"></div>';
+  });
+  card.innerHTML=html;
+  rIds.forEach(function(id){
+    var el=document.getElementById(id);
+    el.value=calcValues[id];
+    el.addEventListener('input',function(){
+      if(el.value.trim()==='') return;
+      var v=num(el.value,null); if(v===null) return;
+      calcValues[id]=v;
+      if(calcTouched.indexOf(id)<0) calcTouched.push(id);
+      recalc();
+    });
+    el.addEventListener('blur',function(){ if(el.value.trim()===''){ el.value=calcValues[id]; } });
+  });
+}
+document.getElementById('calcResetBtn').addEventListener('click',function(){
+  MC.confirmDlg({title:'Rechner zurücksetzen?',text:'Alle Annahmen gehen auf die Standardwerte zurück; Investition und Fixkosten werden wieder aus dem Budget übernommen.',okLabel:'Zurücksetzen',danger:true},function(){
+    calcTouched=[];
+    rIds.forEach(function(id){ calcValues[id]=rDefaults[id]; document.getElementById(id).value=rDefaults[id]; });
+    recalcBudget();
+    MC.toast('Rechner auf Standardwerte zurückgesetzt');
+  });
+});
+
+/* ---- Live-Wareneinsatz aus dem Pizza-System ---- */
+MC.bus.addEventListener('pizzaCost',function(e){
+  var cost=e.detail.total;
+  if(calcTouched.indexOf('rCogs')<0){
+    var mixed=Math.round((cost+0.70)*100)/100;
+    calcValues.rCogs=mixed;
+    document.getElementById('rCogs').value=mixed;
+    recalc();
+  }
+});
+
+buildCalc();
+buildBudget();
+buildPhases();
+})();
+
+/* ==================== PIZZA-SYSTEM: Ansichten ==================== */
+var PhotoUI; /* wird unten befüllt, von Batches genutzt */
+(function(){
+var fmt=MC.fmt,num=MC.num,esc=MC.esc;
+
+/* ---- Batch-Log ---- */
+var openDetails={};
+function scoreClass(val,invert){
+  if(val===null||val===undefined||val==='') return '';
+  var v=num(val,0);
+  if(invert){ return v<=3?'score-hi':(v<=6?'score-mid':'score-lo'); }
+  return v>=8?'score-hi':(v>=5?'score-mid':'score-lo');
+}
+function sellablePill(s){
+  if(s==='ja') return '<span class="pill pill-basil">Verkaufsfähig</span>';
+  if(s==='teilweise') return '<span class="pill pill-neutral">Teilweise</span>';
+  if(s==='nein') return '<span class="pill pill-ember">Nicht verkaufsf.</span>';
+  return '';
+}
+function sortedBatches(){
+  var arr=data.batches.slice();
+  arr.sort(function(a,b){
+    var c=(a.date||'').localeCompare(b.date||'');
+    if(c===0) c=(a.id||'').localeCompare(b.id||'');
+    return data.settings.batchSort==='asc'?c:-c;
+  });
+  return arr;
+}
+var batchDetailFields=[
+  ['system','Teig-System',''],['flour','Mehl',''],['balls','Ballen',''],['ballWeight','g/Ballen','g'],
+  ['hydration','Hydration','%'],['saltPct','Salz','%'],['yeastG','Frischhefe','g'],
+  ['waterTemp','Wasser','°C'],['roomTemp','Raum','°C'],['doughTemp','Teig n. Kneten','°C'],['fridgeTemp','Kühlschrank','°C'],
+  ['kneadMin','Knetzeit','min'],['fridgeH','Kühlschrank','h'],['roomH','Raumgare','h'],
+  ['stretchFold','Stretch & Fold',''],['autolyse','Autolyse',''],
+  ['stoneFront','Stein vorne','°C'],['stoneMid','Stein Mitte','°C'],['stoneBack','Stein hinten','°C'],
+  ['flamePre','Flamme Vorheizen',''],['flameBake','Flamme Backen',''],['firstTurnS','1. Drehung','s'],['turnIntervalS','Drehintervall','s'],['bakeS','Backzeit','s'],
+  ['sauceG','Sauce','g'],['mozzG','Mozzarella','g'],['semolaNote','Semola',''],
+  ['crisp','Knusprigkeit','/10'],['bitterness','Bitterkeit','/10'],['openScore','Öffnen/Ausbreiten','/10'],['taste','Geschmack','/10'],
+  ['bottomNote','Boden',''],['rimNote','Rand','']
+];
+function renderBatches(){
+  var wrap=document.getElementById('batchList');
+  var arr=sortedBatches();
+  document.getElementById('batchEmpty').style.display=arr.length?'none':'';
+  var html='';
+  arr.forEach(function(b){
+    var open=!!openDetails[b.id];
+    var nPh=PhotoUI?PhotoUI.count(b.id):0;
+    html+='<div class="batch-card'+(open?' open':'')+'" data-id="'+esc(b.id)+'">'+
+      '<div class="batch-head" role="button" aria-expanded="'+open+'">'+
+        '<span class="b-id">'+esc(b.id)+'</span>'+
+        '<span class="b-date">'+esc(MC.fmtDateCH(b.date))+'</span>'+
+        (b.system?'<span class="pill pill-neutral">'+esc(b.system)+'</span>':'')+
+        '<div class="b-flex">'+
+          (nPh?'<span class="pill pill-semola">📷 '+nPh+'</span>':'')+
+          (b.result!=null&&b.result!==''?'<span class="score '+scoreClass(b.result,false)+'">'+esc(String(b.result))+'/10</span>':'')+
+          sellablePill(b.sellable)+
+        '</div>'+
+      '</div>';
+    if(!open && b.note) html+='<div class="batch-note">'+esc(String(b.note).length>90?String(b.note).slice(0,90)+'…':b.note)+'</div>';
+    if(open){
+      var cells='';
+      batchDetailFields.forEach(function(f){
+        var v=b[f[0]];
+        if(v===null||v===undefined||v==='') return;
+        cells+='<div class="bd"><b>'+esc(f[1])+'</b>'+esc(String(v))+(f[2]?' '+f[2]:'')+'</div>';
+      });
+      if(b.nextChange) cells+='<div class="bd bd-wide"><b>Nächstes Mal ändern</b>'+esc(b.nextChange)+'</div>';
+      if(b.note) cells+='<div class="bd bd-wide"><b>Notiz</b>'+esc(b.note)+'</div>';
+      html+='<div class="batch-body">'+
+        '<div class="batch-detail">'+(cells||'<div class="bd">Keine Detaildaten erfasst.</div>')+'</div>'+
+        '<div class="photo-strip" data-batch="'+esc(b.id)+'"><button class="ph-add" title="Foto aufnehmen">📷</button></div>'+
+        '<div class="batch-actions">'+
+          '<button class="mc-btn mc-btn-ghost bt-edit">✎ Bearbeiten</button>'+
+          '<button class="mc-btn mc-btn-ghost bt-del">🗑 Löschen</button>'+
+        '</div>'+
+      '</div>';
+    }
+    html+='</div>';
+  });
+  wrap.innerHTML=html;
+  if(PhotoUI){
+    arr.forEach(function(b){ if(openDetails[b.id]) PhotoUI.fillStrip(b.id); });
+  }
+}
+document.getElementById('batchList').addEventListener('click',function(e){
+  var card=e.target.closest('.batch-card'); if(!card) return;
+  var id=card.dataset.id;
+  var b=data.batches.find(function(x){return x.id===id;});
+  if(!b) return;
+  if(e.target.closest('.ph-add')){ PhotoUI.capture(id); return; }
+  if(e.target.closest('.ph')){ var pid=e.target.closest('.ph').dataset.photo; PhotoUI.view(pid,id); return; }
+  if(e.target.closest('.bt-edit')){ openBatchForm(b); return; }
+  if(e.target.closest('.bt-del')){ deleteBatch(b); return; }
+  if(e.target.closest('.batch-head')){ openDetails[id]=!openDetails[id]; renderBatches(); }
+});
+function nextBatchId(){
+  var maxN=0;
+  data.batches.forEach(function(b){ var m=/^BT-(\d+)$/.exec(b.id||''); if(m) maxN=Math.max(maxN,parseInt(m[1],10)); });
+  return 'BT-'+String(maxN+1).padStart(3,'0');
+}
+function flourDatalist(){
+  var s={}; data.batches.forEach(function(b){ if(b.flour) s[b.flour]=1; });
+  ['Caputo Nuvola','Caputo Pizzeria','Caputo Rot','Caputo Nuvola Super'].forEach(function(f){ s[f]=1; });
+  return Object.keys(s);
+}
+var VAR_FIELDS=['flour','balls','ballWeight','hydration','saltPct','yeastG','fridgeH','roomH','system','kneadMin'];
+function openBatchForm(existing){
+  var isNew=!existing;
+  var sb=sortedBatches();
+  var last=sb[data.settings.batchSort==='desc'?0:sb.length-1]||null;
+  var vals=existing?existing:(function(){
+    var v={ id:nextBatchId(), date:MC.todayISO(), sellable:'' };
+    if(last){ ['flour','balls','ballWeight','system','hydration','saltPct','fridgeH'].forEach(function(k){ v[k]=last[k]; }); }
+    return v;
+  })();
+  MC.openForm({
+    title:isNew?'Neuer Batch':'Batch '+existing.id+' bearbeiten',
+    subtitle:isNew?'Nur Batch-Nr. und Datum sind Pflicht. Rezeptwerte sind vom letzten Batch vorbefüllt.':'Leere Felder werden als „—" angezeigt.',
+    groups:[
+      {key:'teig', label:'Teig & Gare (Temperaturen, Zeiten)', open:false},
+      {key:'ofen', label:'Ofen & Backen', open:false},
+      {key:'belag', label:'Belag', open:false},
+      {key:'bewertung', label:'Bewertung', open:true},
+      {key:'notizen', label:'Notizen & Erkenntnisse', open:true}
+    ],
+    fields:[
+      {key:'id', label:'Batch-Nr.', type:'text', required:true, half:true, errorMsg:'Bitte Batch-Nr. angeben'},
+      {key:'date', label:'Datum', type:'date', required:true, half:true, errorMsg:'Bitte Datum wählen'},
+      {key:'system', label:'Teig-System', type:'select', half:true, options:[{v:'',l:'—'},{v:'24h',l:'24h'},{v:'44h',l:'44h'},{v:'48h',l:'48h'}]},
+      {key:'flour', label:'Mehl', type:'text', half:true, datalist:flourDatalist()},
+      {key:'balls', label:'Anzahl Ballen', type:'number', half:true, step:1, min:0},
+      {key:'ballWeight', label:'Gewicht pro Ballen (g)', type:'number', half:true, step:1, min:0},
+      {key:'hydration', label:'Hydration (%)', type:'number', group:'teig', half:true, step:0.5, min:0, max:100},
+      {key:'saltPct', label:'Salz (%)', type:'number', group:'teig', half:true, step:0.1, min:0, max:10},
+      {key:'yeastG', label:'Frischhefe (g)', type:'number', group:'teig', half:true, step:0.1, min:0},
+      {key:'kneadMin', label:'Knetzeit (min)', type:'number', group:'teig', half:true, step:1, min:0},
+      {key:'waterTemp', label:'Wasser (°C)', type:'number', group:'teig', half:true, step:1},
+      {key:'roomTemp', label:'Raum (°C)', type:'number', group:'teig', half:true, step:1},
+      {key:'doughTemp', label:'Teig nach Kneten (°C)', type:'number', group:'teig', half:true, step:0.5},
+      {key:'fridgeTemp', label:'Kühlschrank (°C)', type:'number', group:'teig', half:true, step:0.5},
+      {key:'fridgeH', label:'Kühlschrank (h)', type:'number', group:'teig', half:true, step:1, min:0},
+      {key:'roomH', label:'Raumgare (h)', type:'number', group:'teig', half:true, step:0.5, min:0},
+      {key:'stretchFold', label:'Stretch & Fold', type:'text', group:'teig', half:true, placeholder:'z.B. 1× nach 20 Min'},
+      {key:'autolyse', label:'Autolyse', type:'select', group:'teig', half:true, options:[{v:'',l:'—'},{v:'Ja',l:'Ja'},{v:'Nein',l:'Nein'}]},
+      {key:'stoneFront', label:'Stein vorne (°C)', type:'number', group:'ofen', half:true, step:5},
+      {key:'stoneMid', label:'Stein Mitte (°C)', type:'number', group:'ofen', half:true, step:5},
+      {key:'stoneBack', label:'Stein hinten (°C)', type:'number', group:'ofen', half:true, step:5},
+      {key:'bakeS', label:'Backzeit (s)', type:'number', group:'ofen', half:true, step:5, min:0},
+      {key:'flamePre', label:'Flamme Vorheizen', type:'text', group:'ofen', half:true, placeholder:'z.B. Vollgas'},
+      {key:'flameBake', label:'Flamme Backen', type:'text', group:'ofen', half:true, placeholder:'z.B. Minimum'},
+      {key:'firstTurnS', label:'1. Drehung (s)', type:'text', group:'ofen', half:true, placeholder:'z.B. 20–25'},
+      {key:'turnIntervalS', label:'Drehintervall (s)', type:'text', group:'ofen', half:true, placeholder:'z.B. 10–15'},
+      {key:'sauceG', label:'Sauce (g)', type:'number', group:'belag', half:true, step:5, min:0},
+      {key:'mozzG', label:'Mozzarella (g)', type:'text', group:'belag', half:true, placeholder:'z.B. 77–80'},
+      {key:'semolaNote', label:'Semola-Bewertung', type:'text', group:'belag'},
+      {key:'result', label:'Ergebnis (0–10)', type:'number', group:'bewertung', half:true, step:1, min:0, max:10},
+      {key:'bitterness', label:'Bitterkeit (0–10, 0 = keine)', type:'number', group:'bewertung', half:true, step:1, min:0, max:10},
+      {key:'crisp', label:'Knusprigkeit (0–10)', type:'number', group:'bewertung', half:true, step:1, min:0, max:10},
+      {key:'openScore', label:'Öffnen/Ausbreiten (0–10)', type:'number', group:'bewertung', half:true, step:1, min:0, max:10},
+      {key:'taste', label:'Geschmack (0–10)', type:'number', group:'bewertung', half:true, step:1, min:0, max:10},
+      {key:'sellable', label:'Verkaufsfähig?', type:'pills', group:'bewertung', options:[{v:'ja',l:'✓ Ja'},{v:'teilweise',l:'~ Teilweise'},{v:'nein',l:'✗ Nein'}]},
+      {key:'bottomNote', label:'Boden', type:'text', group:'bewertung', half:true},
+      {key:'rimNote', label:'Rand', type:'text', group:'bewertung', half:true},
+      {key:'nextChange', label:'Nächstes Mal ändern', type:'textarea', group:'notizen', help:'Deine Regel: pro Batch nur eine Variable ändern.'},
+      {key:'note', label:'Notiz', type:'textarea', group:'notizen'}
+    ],
+    values:vals,
+    validate:function(out){
+      if(data.batches.some(function(b){ return b!==existing && b.id===out.id; })){
+        return {key:'id', msg:'Batch-Nr. '+out.id+' existiert schon — bitte andere Nummer wählen'};
+      }
+      return null;
+    },
+    onSave:function(out){
+      if(existing){
+        if(existing.id!==out.id){
+          openDetails[out.id]=openDetails[existing.id]; delete openDetails[existing.id];
+          if(PhotoUI) PhotoUI.rekey(existing.id,out.id);
+        }
+        Object.keys(out).forEach(function(k){ existing[k]=out[k]; });
+        save(); renderBatches();
+        MC.toast('Batch '+out.id+' gespeichert');
+      } else {
+        data.batches.push(out);
+        save(); renderBatches();
+        var changed=[];
+        if(last){
+          VAR_FIELDS.forEach(function(k){
+            var a=last[k],bv=out[k];
+            if(a===null||a===undefined||a===''||bv===null||bv===undefined||bv==='') return;
+            if(String(a)!==String(bv)) changed.push(k);
+          });
+        }
+        if(changed.length>1) MC.toast(out.id+' angelegt — Achtung: '+changed.length+' Variablen geändert ggü. '+last.id+' (Regel: nur 1)');
+        else MC.toast('Batch '+out.id+' angelegt');
+      }
+    }
+  });
+}
+function deleteBatch(b){
+  MC.confirmDlg({title:'Batch löschen?',text:'Batch '+b.id+' vom '+MC.fmtDateCH(b.date)+' wirklich löschen? Das Batch-Log ist Teil deiner Rückverfolgbarkeit.',okLabel:'Löschen',danger:true},function(){
+    var idx=data.batches.indexOf(b);
+    data.batches.splice(idx,1);
+    save(); renderBatches();
+    MC.toast('Batch '+b.id+' gelöscht',function(){
+      data.batches.splice(Math.min(idx,data.batches.length),0,b);
+      save(); renderBatches();
+    });
+  });
+}
+function toggleSort(){
+  data.settings.batchSort=data.settings.batchSort==='desc'?'asc':'desc';
+  save(); renderBatches(); registerBatchActions();
+}
+function registerBatchActions(){
+  Nav.actions('batches',[
+    {label:data.settings.batchSort==='desc'?'↕ Neueste':'↕ Älteste', fn:toggleSort, title:'Sortierung umkehren'},
+    {label:'+ Neu', primary:true, fn:function(){ openBatchForm(null); }}
+  ]);
+}
+document.getElementById('batchEmptyAddBtn').addEventListener('click',function(){ openBatchForm(null); });
+
+/* ---- Prozess ---- */
+function renderProcess(){
+  var list=document.getElementById('processList');
+  document.getElementById('processEmpty').style.display=data.processSteps.length?'none':'';
+  var html='';
+  data.processSteps.forEach(function(s,i){
+    html+='<li class="tl-item" data-id="'+esc(s.id)+'">'+
+      '<span class="tl-time">'+esc(s.time)+'</span>'+
+      '<div class="tl-step">'+esc(s.title)+'</div>'+
+      '<div class="tl-detail">'+esc(s.detail)+'</div>'+
+      '<div class="tl-actions">'+
+        (i>0?'<button class="mc-iconbtn ps-up" title="Nach oben">↑</button>':'')+
+        (i<data.processSteps.length-1?'<button class="mc-iconbtn ps-down" title="Nach unten">↓</button>':'')+
+        '<button class="mc-iconbtn ps-edit" title="Bearbeiten">✎</button>'+
+        '<button class="mc-iconbtn ps-del" title="Löschen">🗑</button>'+
+      '</div></li>';
+  });
+  list.innerHTML=html;
+}
+document.getElementById('processList').addEventListener('click',function(e){
+  var li=e.target.closest('li[data-id]'); if(!li) return;
+  var idx=data.processSteps.findIndex(function(s){return s.id===li.dataset.id;});
+  if(idx<0) return;
+  var step=data.processSteps[idx];
+  if(e.target.closest('.ps-up')&&idx>0){
+    data.processSteps.splice(idx,1); data.processSteps.splice(idx-1,0,step); save(); renderProcess();
+  } else if(e.target.closest('.ps-down')&&idx<data.processSteps.length-1){
+    data.processSteps.splice(idx,1); data.processSteps.splice(idx+1,0,step); save(); renderProcess();
+  } else if(e.target.closest('.ps-edit')){
+    openProcessForm(step);
+  } else if(e.target.closest('.ps-del')){
+    MC.confirmDlg({title:'Schritt löschen?',text:'«'+step.title+'» ('+step.time+') aus dem Prozess entfernen?',okLabel:'Löschen',danger:true},function(){
+      data.processSteps.splice(idx,1); save(); renderProcess();
+      MC.toast('Schritt gelöscht',function(){ data.processSteps.splice(Math.min(idx,data.processSteps.length),0,step); save(); renderProcess(); });
+    });
+  }
+});
+function openProcessForm(existing){
+  var last=data.processSteps[data.processSteps.length-1];
+  MC.openForm({
+    title:existing?'Prozess-Schritt bearbeiten':'Neuer Prozess-Schritt',
+    subtitle:'Die Zeitmarke ist Freitext (z.B. T−24h) — die Reihenfolge steuerst du mit den Pfeilen in der Liste.',
+    fields:[
+      {key:'time', label:'Zeitmarke', type:'text', required:true, half:true, placeholder:'z.B. T−24h', errorMsg:'Bitte Zeitmarke angeben'},
+      {key:'title', label:'Schritt', type:'text', required:true, half:true, errorMsg:'Bitte Titel angeben'},
+      {key:'detail', label:'Details', type:'textarea'}
+    ],
+    values:existing||{ time:last?last.time:'T−24h', title:'', detail:'' },
+    onSave:function(out){
+      if(existing){ existing.time=out.time; existing.title=out.title; existing.detail=out.detail; }
+      else data.processSteps.push({id:MC.uid('ps'), time:out.time, title:out.title, detail:out.detail});
+      save(); renderProcess();
+      MC.toast(existing?'Schritt gespeichert':'Schritt angelegt');
+    }
+  });
+}
+Nav.actions('prozess',[{label:'+ Schritt', primary:true, fn:function(){ openProcessForm(null); }}]);
+
+/* ---- Kosten ---- */
+function renderCost(){
+  var wrap=document.getElementById('costList'), ew=document.getElementById('extraList');
+  var html='';
+  data.ingredients.forEach(function(ing){
+    html+='<div class="cost-card" data-id="'+esc(ing.id)+'" data-kind="ing">'+
+      '<div class="cc-head"><input type="text" class="c-name" value="'+esc(ing.name)+'" aria-label="Zutat Name"><button class="mc-iconbtn c-del" title="Zutat löschen">🗑</button></div>'+
+      '<div class="cc-grid">'+
+        '<div class="field"><label>Preis CHF</label><input type="number" class="c-price" value="'+num(ing.price,0)+'" step="0.01" min="0" inputmode="decimal"></div>'+
+        '<div class="field"><label>Packung g</label><input type="number" class="c-unit" value="'+num(ing.unit,1)+'" step="1" min="1" inputmode="numeric"></div>'+
+        '<div class="field"><label>Menge g</label><input type="number" class="c-qty" value="'+num(ing.qty,0)+'" step="0.5" min="0" inputmode="decimal"></div>'+
+      '</div>'+
+      '<div class="cc-cost"><span>Kosten/Pizza</span><b class="c-cost">—</b></div>'+
+    '</div>';
+  });
+  wrap.innerHTML=html;
+  html='';
+  data.extras.forEach(function(ex){
+    html+='<div class="cost-card" data-id="'+esc(ex.id)+'" data-kind="extra">'+
+      '<div class="cc-head"><input type="text" class="c-name" value="'+esc(ex.name)+'" aria-label="Position Name"><button class="mc-iconbtn c-del" title="Position löschen">🗑</button></div>'+
+      '<div class="cc-grid"><div class="field"><label>CHF / Pizza</label><input type="number" class="c-price" value="'+num(ex.price,0)+'" step="0.05" min="0" inputmode="decimal"></div></div>'+
+      (ex.note?'<div class="cc-cost"><span>'+esc(ex.note)+'</span><b class="c-cost">—</b></div>':'<div class="cc-cost"><span>pauschal</span><b class="c-cost">—</b></div>')+
+    '</div>';
+  });
+  ew.innerHTML=html;
+  runCost();
+}
+function runCost(){
+  var total=0;
+  document.querySelectorAll('#costList .cost-card').forEach(function(tr){
+    var ing=data.ingredients.find(function(x){return x.id===tr.dataset.id;}); if(!ing) return;
+    var perG=num(ing.unit,1)>0?num(ing.price,0)/num(ing.unit,1):0;
+    var cost=perG*num(ing.qty,0);
+    total+=cost;
+    tr.querySelector('.c-cost').textContent='CHF '+fmt(cost,3);
+  });
+  document.querySelectorAll('#extraList .cost-card').forEach(function(tr){
+    var ex=data.extras.find(function(x){return x.id===tr.dataset.id;}); if(!ex) return;
+    total+=num(ex.price,0);
+    tr.querySelector('.c-cost').textContent='CHF '+fmt(num(ex.price,0),3);
+  });
+  var sell=num(data.settings.sellPrice,0);
+  var margin=sell-total;
+  document.getElementById('costTotal').textContent='CHF '+fmt(total,2);
+  document.getElementById('marginTotal').textContent='CHF '+fmt(margin,2);
+  document.getElementById('kpiCost').textContent='CHF '+fmt(total,2);
+  document.getElementById('kpiMargin').textContent='CHF '+fmt(margin,2);
+  var pct=sell>0?(margin/sell*100):0;
+  document.getElementById('kpiMarginPct').textContent='bei CHF '+fmt(sell,2)+' Verkaufspreis · '+fmt(pct,0)+' %';
+  MC.bus.dispatchEvent(new CustomEvent('pizzaCost',{detail:{total:total}}));
+}
+document.getElementById('view-kosten').addEventListener('input',function(e){
+  if(e.target.id==='sellPrice'){
+    if(e.target.value.trim()==='') return;
+    var sp=num(e.target.value,null); if(sp===null) return;
+    data.settings.sellPrice=sp; save(); runCost(); return;
+  }
+  var tr=e.target.closest('.cost-card[data-id]'); if(!tr) return;
+  var list=tr.dataset.kind==='extra'?data.extras:data.ingredients;
+  var item=list.find(function(x){return x.id===tr.dataset.id;}); if(!item) return;
+  if(e.target.classList.contains('c-name')){ if(e.target.value.trim()!=='') item.name=e.target.value.trim(); save(); return; }
+  if(e.target.value.trim()==='') return;
+  var v=num(e.target.value,null); if(v===null) return;
+  if(e.target.classList.contains('c-price')) item.price=v;
+  else if(e.target.classList.contains('c-unit')) item.unit=Math.max(1,v);
+  else if(e.target.classList.contains('c-qty')) item.qty=v;
+  save(); runCost();
+});
+document.getElementById('view-kosten').addEventListener('click',function(e){
+  var del=e.target.closest('.c-del'); if(!del) return;
+  var tr=e.target.closest('.cost-card[data-id]');
+  var isExtra=tr.dataset.kind==='extra';
+  var list=isExtra?data.extras:data.ingredients;
+  var idx=list.findIndex(function(x){return x.id===tr.dataset.id;}); if(idx<0) return;
+  var item=list[idx];
+  MC.confirmDlg({title:'Position löschen?',text:'«'+item.name+'» aus der Kalkulation entfernen?',okLabel:'Löschen',danger:true},function(){
+    list.splice(idx,1); save(); renderCost();
+    MC.toast('«'+item.name+'» gelöscht',function(){ list.splice(Math.min(idx,list.length),0,item); save(); renderCost(); });
+  });
+});
+Nav.actions('kosten',[{label:'+ Zutat', primary:true, fn:function(){
+  MC.openForm({
+    title:'Neue Zutat / Kostenposition',
+    subtitle:'Zutaten rechnen über Preis pro Packung; Pauschalen (z.B. Gas) als «pauschal pro Pizza».',
+    fields:[
+      {key:'kind', label:'Art', type:'pills', options:[{v:'ing',l:'Zutat (nach Gewicht)'},{v:'extra',l:'Pauschale pro Pizza'}], required:true, errorMsg:'Bitte Art wählen'},
+      {key:'name', label:'Name', type:'text', required:true, errorMsg:'Bitte Namen angeben'},
+      {key:'price', label:'Preis (CHF)', type:'number', step:0.05, min:0, half:true, help:'Bei Zutat: Preis der Packung. Bei Pauschale: CHF pro Pizza.'},
+      {key:'unit', label:'Packungsgrösse (g)', type:'number', step:1, min:1, half:true, help:'Nur für Zutaten relevant.'},
+      {key:'qty', label:'Menge pro Pizza (g)', type:'number', step:0.5, min:0, half:true}
+    ],
+    values:{kind:'ing', unit:1000},
+    onSave:function(out){
+      if(out.kind==='extra'){ data.extras.push({id:MC.uid('ex'), name:out.name, price:num(out.price,0), note:''}); }
+      else { data.ingredients.push({id:MC.uid('ing'), name:out.name, price:num(out.price,0), unit:num(out.unit,1000)||1000, qty:num(out.qty,0)}); }
+      save(); renderCost(); MC.toast('«'+out.name+'» hinzugefügt');
+    }
+  });
+}}]);
+document.getElementById('costFromRecipeBtn').addEventListener('click',function(){
+  var d=data.dough;
+  var h=d.hydration/100,s=d.salt/100,y=d.yeast/100;
+  var mehl=d.ballWeight/(1+h+s+y);
+  var setQty=function(role,val){
+    var ing=data.ingredients.find(function(x){return x.role===role;});
+    if(ing) ing.qty=Math.round(val*10)/10;
+  };
+  setQty('mehl',mehl); setQty('wasser',mehl*h); setQty('salz',mehl*s); setQty('hefe',mehl*y);
+  save(); renderCost();
+  MC.toast('Mengen aus Rezept übernommen ('+d.ballWeight+' g Ballen, '+d.hydration+'% Hydration)');
+});
+document.getElementById('costResetBtn').addEventListener('click',function(){
+  MC.confirmDlg({title:'Kosten zurücksetzen?',text:'Zutatenliste, Pauschalen und Verkaufspreis gehen auf die Standardwerte zurück.',okLabel:'Zurücksetzen',danger:true},function(){
+    var sd=seedData();
+    data.ingredients=sd.ingredients; data.extras=sd.extras; data.settings.sellPrice=sd.settings.sellPrice;
+    document.getElementById('sellPrice').value=sd.settings.sellPrice;
+    save(); renderCost(); MC.toast('Kostenkalkulation zurückgesetzt');
+  });
+});
+
+/* ---- Troubleshooting ---- */
+function renderTrouble(){
+  var wrap=document.getElementById('troubleList');
+  document.getElementById('troubleEmpty').style.display=data.trouble.length?'none':'';
+  var html='';
+  data.trouble.forEach(function(t){
+    var blocks='';
+    if(t.causes) blocks+='<div class="tb-label">Wahrscheinliche Ursachen</div>'+esc(t.causes);
+    if(t.checks) blocks+='<div class="tb-label">Prüfpunkte</div>'+esc(t.checks);
+    if(t.now) blocks+='<div class="tb-label">Sofortmassnahme</div>'+esc(t.now);
+    if(t.later) blocks+='<div class="tb-label">Langfristige Optimierung</div>'+esc(t.later);
+    blocks+='<div style="display:flex;gap:8px;margin-top:11px"><button class="mc-btn mc-btn-ghost tr-edit" data-id="'+esc(t.id)+'">✎ Bearbeiten</button><button class="mc-btn mc-btn-ghost tr-del" data-id="'+esc(t.id)+'">🗑 Löschen</button></div>';
+    html+='<details class="acc" data-id="'+esc(t.id)+'"><summary>'+esc(t.symptom)+'</summary><div class="acc-body">'+blocks+'</div></details>';
+  });
+  wrap.innerHTML=html;
+}
+document.getElementById('troubleList').addEventListener('click',function(e){
+  var btn=e.target.closest('.tr-edit,.tr-del'); if(!btn) return;
+  var idx=data.trouble.findIndex(function(x){return x.id===btn.dataset.id;}); if(idx<0) return;
+  var t=data.trouble[idx];
+  if(btn.classList.contains('tr-edit')) openTroubleForm(t);
+  else MC.confirmDlg({title:'Eintrag löschen?',text:'«'+t.symptom+'» aus dem Troubleshooting entfernen?',okLabel:'Löschen',danger:true},function(){
+    data.trouble.splice(idx,1); save(); renderTrouble();
+    MC.toast('Eintrag gelöscht',function(){ data.trouble.splice(Math.min(idx,data.trouble.length),0,t); save(); renderTrouble(); });
+  });
+});
+function openTroubleForm(existing){
+  MC.openForm({
+    title:existing?'Troubleshooting bearbeiten':'Neues Symptom',
+    subtitle:'Nur das Symptom ist Pflicht — Wissen kannst du später ergänzen.',
+    fields:[
+      {key:'symptom', label:'Symptom', type:'text', required:true, errorMsg:'Bitte Symptom beschreiben'},
+      {key:'causes', label:'Wahrscheinliche Ursachen', type:'textarea'},
+      {key:'checks', label:'Prüfpunkte', type:'textarea'},
+      {key:'now', label:'Sofortmassnahme', type:'textarea'},
+      {key:'later', label:'Langfristige Optimierung', type:'textarea'}
+    ],
+    values:existing||{},
+    onSave:function(out){
+      if(existing){ Object.assign(existing,out); }
+      else data.trouble.push(Object.assign({id:MC.uid('t')},out));
+      save(); renderTrouble();
+      MC.toast(existing?'Eintrag gespeichert':'Symptom angelegt');
+    }
+  });
+}
+Nav.actions('trouble',[{label:'+ Symptom', primary:true, fn:function(){ openTroubleForm(null); }}]);
+
+/* ---- Roadmap ---- */
+var STATUS_META={ offen:{l:'Offen',p:'pill-neutral'}, test:{l:'Im Test',p:'pill-semola'}, integriert:{l:'Integriert',p:'pill-basil'}, verworfen:{l:'Verworfen',p:'pill-ember'} };
+function renderRoadmap(){
+  var wrap=document.getElementById('roadmapList');
+  document.getElementById('roadmapEmpty').style.display=data.roadmap.length?'none':'';
+  var order={test:0,offen:1,integriert:2,verworfen:3};
+  var arr=data.roadmap.slice().sort(function(a,b){
+    if(a.prio!==b.prio) return a.prio-b.prio;
+    var oa=(a.status in order)?order[a.status]:1, ob=(b.status in order)?order[b.status]:1;
+    return oa-ob;
+  });
+  var html='';
+  arr.forEach(function(r){
+    var sm=STATUS_META[r.status]||STATUS_META.offen;
+    html+='<div class="card" data-id="'+esc(r.id)+'" style="padding:12px 14px">'+
+      '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">'+
+        '<span class="prio prio-'+num(r.prio,4)+'">'+num(r.prio,4)+'</span>'+
+        '<strong style="flex:1;min-width:0;font-size:14px">'+esc(r.topic)+'</strong>'+
+        '<span class="pill '+sm.p+'">'+sm.l+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;color:var(--ink-soft);margin-top:6px">'+esc(r.hyp)+'</div>'+
+      (r.statusNote?'<div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px">'+esc(r.statusNote)+'</div>':'')+
+      (r.next&&r.next!=='—'?'<div style="font-size:12.5px;margin-top:6px"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)">Nächster Test</b><br>'+esc(r.next)+'</div>':'')+
+      '<div style="display:flex;gap:4px;margin-top:8px;justify-content:flex-end"><button class="mc-iconbtn rm-edit" title="Bearbeiten">✎</button><button class="mc-iconbtn rm-del" title="Löschen">🗑</button></div>'+
+    '</div>';
+  });
+  wrap.innerHTML=html;
+}
+document.getElementById('roadmapList').addEventListener('click',function(e){
+  var tr=e.target.closest('[data-id]'); if(!tr) return;
+  var idx=data.roadmap.findIndex(function(x){return x.id===tr.dataset.id;}); if(idx<0) return;
+  var r=data.roadmap[idx];
+  if(e.target.closest('.rm-edit')) openRoadmapForm(r);
+  else if(e.target.closest('.rm-del')) MC.confirmDlg({title:'Hypothese löschen?',text:'«'+r.topic+'» aus der Roadmap entfernen? Tipp: Erledigtes lieber auf «Integriert» oder «Verworfen» setzen — dann bleibt die Historie erhalten.',okLabel:'Löschen',danger:true},function(){
+    data.roadmap.splice(idx,1); save(); renderRoadmap();
+    MC.toast('Hypothese gelöscht',function(){ data.roadmap.splice(Math.min(idx,data.roadmap.length),0,r); save(); renderRoadmap(); });
+  });
+});
+function openRoadmapForm(existing){
+  MC.openForm({
+    title:existing?'Hypothese bearbeiten':'Neue Hypothese',
+    fields:[
+      {key:'topic', label:'Thema', type:'text', required:true, errorMsg:'Bitte Thema angeben'},
+      {key:'hyp', label:'Hypothese', type:'textarea', required:true, errorMsg:'Bitte Hypothese formulieren'},
+      {key:'prio', label:'Priorität (1 = wichtigste)', type:'pills', required:true, options:[{v:'1',l:'1'},{v:'2',l:'2'},{v:'3',l:'3'},{v:'4',l:'4'}], errorMsg:'Bitte Priorität wählen'},
+      {key:'status', label:'Status', type:'pills', required:true, options:[{v:'offen',l:'Offen'},{v:'test',l:'Im Test'},{v:'integriert',l:'Integriert'},{v:'verworfen',l:'Verworfen'}], errorMsg:'Bitte Status wählen'},
+      {key:'statusNote', label:'Status-Zusatz (optional)', type:'text', placeholder:'z.B. Bezugsquelle fehlt'},
+      {key:'next', label:'Nächster Test', type:'textarea'}
+    ],
+    values:existing?Object.assign({},existing,{prio:String(existing.prio)}):{prio:'2',status:'offen'},
+    onSave:function(out){
+      out.prio=num(out.prio,4);
+      if(existing){ Object.assign(existing,out); }
+      else data.roadmap.push(Object.assign({id:MC.uid('r')},out));
+      save(); renderRoadmap();
+      MC.toast(existing?'Hypothese gespeichert':'Hypothese angelegt');
+    }
+  });
+}
+document.getElementById('roadmapAddBtn').addEventListener('click',function(){ openRoadmapForm(null); });
+
+/* ---- Entscheidungslog ---- */
+function renderDecisions(){
+  var list=document.getElementById('decisionList');
+  document.getElementById('decisionEmpty').style.display=data.decisions.length?'none':'';
+  var dated=data.decisions.filter(function(d){return d.dateISO;}).sort(function(a,b){return b.dateISO.localeCompare(a.dateISO);});
+  var labeled=data.decisions.filter(function(d){return !d.dateISO;});
+  var html='';
+  dated.concat(labeled).forEach(function(d){
+    var dateTxt=d.dateISO?esc(MC.fmtDateCH(d.dateISO))+(d.batchRef?' ('+esc(d.batchRef)+')':''):esc(d.dateLabel||'—');
+    html+='<li class="tl-item" data-id="'+esc(d.id)+'">'+
+      '<span class="dl-date">'+dateTxt+'</span>'+
+      '<div class="dl-decision">'+esc(d.decision)+'</div>'+
+      '<div class="dl-why">'+esc(d.why)+'</div>'+
+      (d.status?'<div class="dl-status"><span class="pill pill-neutral">'+esc(d.status)+'</span></div>':'')+
+      '<div class="tl-actions"><button class="mc-iconbtn dc-edit" title="Bearbeiten">✎</button><button class="mc-iconbtn dc-del" title="Löschen">🗑</button></div></li>';
+  });
+  list.innerHTML=html;
+}
+document.getElementById('decisionList').addEventListener('click',function(e){
+  var li=e.target.closest('li[data-id]'); if(!li) return;
+  var idx=data.decisions.findIndex(function(x){return x.id===li.dataset.id;}); if(idx<0) return;
+  var d=data.decisions[idx];
+  if(e.target.closest('.dc-edit')) openDecisionForm(d);
+  else if(e.target.closest('.dc-del')) MC.confirmDlg({title:'Entscheidung löschen?',text:'«'+d.decision+'» wirklich aus dem Protokoll löschen? Das Log ist deine Historie — überlege, ob ein Status wie «revidiert» besser passt.',okLabel:'Löschen',danger:true},function(){
+    data.decisions.splice(idx,1); save(); renderDecisions();
+    MC.toast('Entscheidung gelöscht',function(){ data.decisions.splice(Math.min(idx,data.decisions.length),0,d); save(); renderDecisions(); });
+  });
+});
+function openDecisionForm(existing){
+  var batchOpts=[{v:'',l:'— kein Batch-Bezug —'}].concat(sortedBatches().map(function(b){return {v:b.id,l:b.id+' ('+MC.fmtDateCH(b.date)+')'};}));
+  MC.openForm({
+    title:existing?'Entscheidung bearbeiten':'Entscheidung protokollieren',
+    subtitle:'Deine Regel: Jede Änderung braucht eine Begründung.',
+    fields:[
+      {key:'decision', label:'Entscheidung', type:'text', required:true, errorMsg:'Was wurde entschieden?'},
+      {key:'why', label:'Begründung', type:'textarea', required:true, errorMsg:'Bitte Begründung angeben — deine eigene Regel!'},
+      {key:'dateISO', label:'Datum', type:'date', half:true, help:'Leer lassen, wenn stattdessen ein Label gilt.'},
+      {key:'dateLabel', label:'…oder Label statt Datum', type:'text', half:true, placeholder:'z.B. Laufend'},
+      {key:'batchRef', label:'Batch-Bezug', type:'select', half:true, options:batchOpts},
+      {key:'status', label:'Status (optional)', type:'text', half:true, placeholder:'z.B. In Testphase / Aktiv / Revidiert'}
+    ],
+    values:existing||{dateISO:MC.todayISO()},
+    onSave:function(out){
+      if(!out.dateISO && !out.dateLabel){ out.dateLabel='—'; }
+      if(existing){ Object.assign(existing,out); }
+      else data.decisions.push(Object.assign({id:MC.uid('d')},out));
+      save(); renderDecisions();
+      MC.toast(existing?'Entscheidung gespeichert':'Entscheidung protokolliert');
+    }
+  });
+}
+document.getElementById('decisionAddBtn').addEventListener('click',function(){ openDecisionForm(null); });
+
+/* ---- Rezept-Rechner ---- */
+var elBallen=document.getElementById('inBallen'), elGewicht=document.getElementById('inGewicht'),
+    elHydration=document.getElementById('inHydration'), elSalz=document.getElementById('inSalz'), elHefe=document.getElementById('inHefe');
+function computeRecipe(totalGrams,hPct,sPct,yPct){
+  var h=hPct/100,s=sPct/100,y=yPct/100;
+  var mehl=totalGrams/(1+h+s+y);
+  return { total:totalGrams, mehl:mehl, wasser:mehl*h, salz:mehl*s, hefe:mehl*y, divisor:1+h+s+y };
+}
+function runCalc(persist){
+  var ballen=Math.max(1,num(elBallen.value,data.dough.balls));
+  var gewicht=Math.max(1,num(elGewicht.value,data.dough.ballWeight));
+  var h=num(elHydration.value,70),s=num(elSalz.value,2.8),y=num(elHefe.value,0.5);
+  document.getElementById('outHydration').textContent=h+'%';
+  document.getElementById('outSalz').textContent=s+'%';
+  document.getElementById('outHefe').textContent=y+'%';
+  var r=computeRecipe(ballen*gewicht,h,s,y);
+  document.getElementById('rTotal').textContent=fmt(r.total,0)+' g';
+  document.getElementById('rMehl').textContent=fmt(r.mehl,1)+' g';
+  document.getElementById('rWasser').textContent=fmt(r.wasser,1)+' g';
+  document.getElementById('rSalz').textContent=fmt(r.salz,1)+' g';
+  document.getElementById('rHefe').textContent=fmt(r.hefe,1)+' g';
+  document.getElementById('faustformelHint').textContent='Faustformel ohne Rechner: Mehl ≈ Ballengewicht × Ballenzahl / '+fmt(r.divisor,2);
+  var counts=[3,6,10,15,20,30], body=document.getElementById('scaleTableBody'), html='';
+  counts.forEach(function(c){
+    var rr=computeRecipe(c*gewicht,h,s,y);
+    html+='<tr><td class="num">'+c+'</td><td class="num">'+fmt(rr.total,0)+'</td><td class="num">'+fmt(rr.mehl,1)+'</td><td class="num">'+fmt(rr.wasser,1)+'</td><td class="num">'+fmt(rr.salz,1)+'</td><td class="num">'+fmt(rr.hefe,1)+'</td></tr>';
+  });
+  body.innerHTML=html;
+  document.getElementById('kpiRecipe').innerHTML=h+'% <small>Hydration</small>';
+  document.getElementById('kpiRecipeSub').textContent=gewicht+' g/Ballen · '+ballen+' Ballen';
+  if(persist){
+    data.dough={balls:ballen, ballWeight:gewicht, hydration:h, salt:s, yeast:y};
+    save();
+  }
+}
+[elBallen,elGewicht,elHydration,elSalz,elHefe].forEach(function(el){
+  el.addEventListener('input',function(){ runCalc(true); });
+});
+(function initCalcFromData(){
+  elBallen.value=data.dough.balls; elGewicht.value=data.dough.ballWeight;
+  elHydration.value=data.dough.hydration; elSalz.value=data.dough.salt; elHefe.value=data.dough.yeast;
+})();
+
+/* ---- exportierte Funktionen für Init & andere Module ---- */
+window.PizzaViews={
+  renderBatches:renderBatches, renderProcess:renderProcess, renderCost:renderCost,
+  renderTrouble:renderTrouble, renderRoadmap:renderRoadmap, renderDecisions:renderDecisions,
+  runCalc:runCalc, openBatchForm:openBatchForm, sortedBatches:sortedBatches, registerBatchActions:registerBatchActions
+};
+})();
+
+/* ==================== KPIs, Backup-Status ==================== */
+function updateKpis(){
+  var latest=null;
+  data.batches.forEach(function(b){ if(!latest || (b.date||'')>(latest.date||'')) latest=b; });
+  if(latest){
+    document.getElementById('kpiLastBatch').innerHTML=MC.esc(latest.id)+(latest.result!=null&&latest.result!==''?' <small>'+MC.esc(String(latest.result))+'/10</small>':'');
+    document.getElementById('kpiLastBatchSub').textContent=MC.fmtDateCH(latest.date)+(latest.flour?' · '+latest.flour:'')+(latest.ballWeight?', '+latest.ballWeight+' g':'');
+  } else {
+    document.getElementById('kpiLastBatch').textContent='—';
+    document.getElementById('kpiLastBatchSub').textContent='Noch kein Batch geloggt';
+  }
+  renderBackupStatus();
+}
+function renderBackupStatus(){
+  var lb=data.settings.lastBackup, txt;
+  if(!lb){ txt='⚠️ Noch kein Backup erstellt — Daten liegen nur auf diesem Gerät. Unter Mehr → Einstellungen sichern.'; }
+  else {
+    var days=Math.floor((Date.now()-new Date(lb+'T12:00:00').getTime())/86400000);
+    txt='Letztes Backup: '+MC.fmtDateCH(lb)+(days>7?' — schon '+days+' Tage her, wieder sichern!':'');
+  }
+  document.getElementById('backupStatus').textContent=txt;
+  document.getElementById('settingsBackupStatus').textContent=txt;
+}
+MC.bus.addEventListener('backupDone',function(){
+  data.settings.lastBackup=MC.todayISO(); save();
+});
+/* ==================== BATCH-FOTOS ==================== */
+PhotoUI=(function(){
+  var counts={}, urls={}, pendingBatch=null;
+  var fileInput=document.getElementById('photoFile');
+
+  function refreshCounts(){
+    return PhotoDB.all().then(function(all){
+      counts={};
+      all.forEach(function(p){ counts[p.batchId]=(counts[p.batchId]||0)+1; });
+      renderPhotoStats(all);
+    }).catch(function(){});
+  }
+  function renderPhotoStats(all){
+    var el=document.getElementById('photoStats');
+    if(!all||!all.length){ el.textContent='Noch keine Batch-Fotos gespeichert.'; return; }
+    var bytes=0; all.forEach(function(p){ bytes+=(p.blob&&p.blob.size)||0; });
+    el.textContent=all.length+' Batch-Foto'+(all.length===1?'':'s')+' gespeichert ('+MC.fmt(bytes/1048576,1)+' MB) — nur im «Backup inkl. Fotos» enthalten.';
+  }
+  function url(p){
+    if(!urls[p.id]) urls[p.id]=URL.createObjectURL(p.blob);
+    return urls[p.id];
+  }
+  function compress(file){
+    return new Promise(function(resolve,reject){
+      var obj=URL.createObjectURL(file);
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var max=1600, w=img.naturalWidth, h=img.naturalHeight;
+          var scale=Math.min(1,max/Math.max(w,h));
+          var cw=Math.max(1,Math.round(w*scale)), ch=Math.max(1,Math.round(h*scale));
+          var c=document.createElement('canvas'); c.width=cw; c.height=ch;
+          c.getContext('2d').drawImage(img,0,0,cw,ch);
+          URL.revokeObjectURL(obj);
+          c.toBlob(function(b){ b?resolve(b):reject(new Error('Komprimierung fehlgeschlagen')); },'image/jpeg',0.82);
+        }catch(err){ URL.revokeObjectURL(obj); reject(err); }
+      };
+      img.onerror=function(){ URL.revokeObjectURL(obj); reject(new Error('Bild konnte nicht gelesen werden')); };
+      img.src=obj;
+    });
+  }
+  fileInput.addEventListener('change',function(){
+    var file=fileInput.files&&fileInput.files[0]; fileInput.value='';
+    if(!file||!pendingBatch) return;
+    var batchId=pendingBatch; pendingBatch=null;
+    compress(file).then(function(blob){
+      return PhotoDB.add({id:MC.uid('ph'), batchId:batchId, ts:Date.now(), blob:blob});
+    }).then(function(){
+      return refreshCounts();
+    }).then(function(){
+      window.PizzaViews.renderBatches();
+      MC.toast('Foto zu '+batchId+' gespeichert');
+    }).catch(function(err){
+      MC.toast('Foto konnte nicht gespeichert werden: '+(err&&err.message||err));
+    });
+  });
+  function capture(batchId){ pendingBatch=batchId; fileInput.click(); }
+  function fillStrip(batchId){
+    PhotoDB.forBatch(batchId).then(function(list){
+      var strip=document.querySelector('.photo-strip[data-batch="'+(window.CSS&&CSS.escape?CSS.escape(batchId):batchId)+'"]');
+      if(!strip) return;
+      list.sort(function(a,b){ return a.ts-b.ts; });
+      var html='';
+      list.forEach(function(p){
+        html+='<button class="ph" data-photo="'+MC.esc(p.id)+'" title="Foto ansehen"><img alt="Batch-Foto" src="'+url(p)+'"></button>';
+      });
+      html+='<button class="ph-add" title="Foto aufnehmen">📷</button>';
+      strip.innerHTML=html;
+    }).catch(function(){});
+  }
+  function view(photoId,batchId){
+    PhotoDB.forBatch(batchId).then(function(list){
+      var p=list.find(function(x){return x.id===photoId;}); if(!p) return;
+      var old=document.getElementById('photoView'); if(old) old.remove();
+      var dlg=document.createElement('dialog'); dlg.className='photo-view'; dlg.id='photoView';
+      dlg.innerHTML='<div class="pv-wrap"><img alt="Batch-Foto gross" src="'+url(p)+'">'+
+        '<div class="pv-bar"><button class="pv-close">Schliessen</button><button class="pv-del">🗑 Löschen</button></div></div>';
+      document.body.appendChild(dlg);
+      dlg.querySelector('.pv-close').addEventListener('click',function(){ dlg.close(); dlg.remove(); });
+      dlg.querySelector('.pv-del').addEventListener('click',function(){
+        MC.confirmDlg({title:'Foto löschen?',text:'Dieses Foto von '+batchId+' endgültig löschen?',okLabel:'Löschen',danger:true},function(){
+          PhotoDB.del(p.id).then(function(){
+            if(urls[p.id]){ URL.revokeObjectURL(urls[p.id]); delete urls[p.id]; }
+            dlg.close(); dlg.remove();
+            return refreshCounts();
+          }).then(function(){ window.PizzaViews.renderBatches(); MC.toast('Foto gelöscht'); });
+        });
+      });
+      dlg.showModal();
+    });
+  }
+  function rekey(oldId,newId){
+    PhotoDB.forBatch(oldId).then(function(list){
+      return Promise.all(list.map(function(p){ p.batchId=newId; return PhotoDB.add(p); }));
+    }).then(refreshCounts).then(function(){ window.PizzaViews.renderBatches(); });
+  }
+  return {
+    capture:capture, fillStrip:fillStrip, view:view, rekey:rekey,
+    count:function(batchId){ return counts[batchId]||0; },
+    refresh:refreshCounts
+  };
+})();
+
+/* ==================== TEIG-TIMER ==================== */
+var Timers=(function(){
+  var PRESETS=[
+    {label:'Ruhe nach Kneten', min:20},
+    {label:'Stretch & Fold → Ballen', min:25},
+    {label:'Ofen aufheizen', min:30},
+    {label:'Raumgare 2 h', min:120},
+    {label:'Raumgare 2.5 h', min:150},
+    {label:'Kaltgare 19 h', min:1140}
+  ];
+  var tickHandle=null;
+  var audioCtx=null;
+  document.addEventListener('pointerdown',function(){
+    try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  },{once:true});
+  function beep(){
+    if(!audioCtx) return;
+    try{
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      var t=audioCtx.currentTime;
+      [0,0.4,0.8].forEach(function(off){
+        var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type='sine'; o.frequency.value=880;
+        g.gain.setValueAtTime(0.0001,t+off);
+        g.gain.exponentialRampToValueAtTime(0.4,t+off+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+off+0.35);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t+off); o.stop(t+off+0.4);
+      });
+    }catch(e){}
+  }
+  function fmtCount(ms){
+    var neg=ms<0; ms=Math.abs(ms);
+    var s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+    var out=h>0?(h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')):(m+':'+String(sec).padStart(2,'0'));
+    return (neg?'−':'')+out;
+  }
+  function fmtDur(min){
+    if(min>=60){ var h=min/60; return (Number.isInteger(h)?h:h.toFixed(1))+' h'; }
+    return min+' Min';
+  }
+  function fmtTarget(ms){
+    var d=new Date(ms);
+    var sameDay=new Date().toDateString()===d.toDateString();
+    var hh=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    return (sameDay?'':MC.fmtDateCH(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'))+' ')+hh;
+  }
+  function start(label,minutes){
+    data.timers.push({id:MC.uid('tm'), label:label, target:Date.now()+minutes*60000, totalMin:minutes, notified:false});
+    save(); render(); ensureTick();
+    MC.toast('Timer «'+label+'» läuft — fertig um '+fmtTarget(Date.now()+minutes*60000));
+  }
+  function remove(id){
+    var idx=data.timers.findIndex(function(t){return t.id===id;}); if(idx<0) return;
+    data.timers.splice(idx,1); save(); render();
+  }
+  function icsEscape(s){ return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,'); }
+  function icsDate(ms){
+    var d=new Date(ms);
+    return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate()).padStart(2,'0')+
+      'T'+String(d.getUTCHours()).padStart(2,'0')+String(d.getUTCMinutes()).padStart(2,'0')+String(d.getUTCSeconds()).padStart(2,'0')+'Z';
+  }
+  function toCalendar(t){
+    var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Pizza Mission//DE','BEGIN:VEVENT',
+      'UID:'+t.id+'@pizza-mission','DTSTAMP:'+icsDate(Date.now()),
+      'DTSTART:'+icsDate(t.target),'DTEND:'+icsDate(t.target+5*60000),
+      'SUMMARY:'+icsEscape('🍕 '+t.label),
+      'DESCRIPTION:'+icsEscape('Teig-Timer aus Pizza Mission'),
+      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEscape(t.label),'TRIGGER:-PT0M','END:VALARM',
+      'END:VEVENT','END:VCALENDAR'];
+    var blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='timer-'+t.label.replace(/[^a-z0-9äöü]+/gi,'-').toLowerCase()+'.ics';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+    MC.toast('Kalender-Datei erstellt — im Dialog «Zu Kalender hinzufügen» wählen.');
+  }
+  function render(){
+    var wrap=document.getElementById('timerList');
+    document.getElementById('timerEmpty').style.display=data.timers.length?'none':'';
+    var now=Date.now(), html='';
+    data.timers.slice().sort(function(a,b){return a.target-b.target;}).forEach(function(t){
+      var rest=t.target-now, done=rest<=0;
+      var elapsed=t.totalMin*60000-rest;
+      var pct=Math.max(0,Math.min(100,elapsed/(t.totalMin*60000)*100));
+      html+='<div class="timer-card'+(done?' done':'')+'" data-id="'+MC.esc(t.id)+'">'+
+        '<div class="timer-top"><span class="t-label">'+MC.esc(t.label)+'</span><span class="t-target">'+(done?'fällig seit':'fertig um')+' '+fmtTarget(t.target)+' · '+fmtDur(t.totalMin)+'</span></div>'+
+        '<div class="timer-count'+(done?' neg':'')+'" data-timer-count>'+fmtCount(rest)+'</div>'+
+        (done?'':'<div class="timer-bar"><div data-timer-bar style="width:'+pct+'%"></div></div>')+
+        '<div class="timer-actions">'+
+          (done?'<button class="mc-btn mc-btn-primary tm-ok">✓ Fertig</button>':'<button class="mc-btn mc-btn-ghost tm-cal">📅 Kalender</button>')+
+          '<button class="mc-btn mc-btn-ghost tm-del">✕ Abbrechen</button>'+
+        '</div>'+
+      '</div>';
+    });
+    wrap.innerHTML=html;
+    renderHomeStrip();
+  }
+  function renderHomeStrip(){
+    var el=document.getElementById('homeTimerStrip');
+    var act=data.timers.slice().sort(function(a,b){return a.target-b.target;});
+    if(!act.length){ el.innerHTML=''; return; }
+    var t=act[0], rest=t.target-Date.now();
+    el.innerHTML='<button class="card" style="width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;border-color:var(--accent)" id="homeTimerBtn">'+
+      '<span style="font-size:22px">⏱️</span>'+
+      '<span style="flex:1;min-width:0"><b>'+MC.esc(t.label)+'</b>'+(act.length>1?' <span class="pill pill-neutral">+'+(act.length-1)+' weitere</span>':'')+'<br>'+
+      '<span style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:'+(rest<0?'var(--ember)':'var(--accent-strong)')+'" data-home-count>'+fmtCount(rest)+'</span></span>'+
+      '<span style="color:var(--ink-faint)">›</span></button>';
+    var btn=document.getElementById('homeTimerBtn');
+    if(btn) btn.addEventListener('click',function(){ Nav.show('timer'); });
+  }
+  function tick(){
+    if(!data.timers.length){ if(tickHandle){ clearInterval(tickHandle); tickHandle=null; } return; }
+    var now=Date.now(), needSave=false, needRender=false;
+    data.timers.forEach(function(t){
+      if(t.target-now<=0 && !t.notified){
+        t.notified=true; needSave=true; needRender=true;
+        beep();
+        if(navigator.vibrate) navigator.vibrate([300,150,300,150,300]);
+        MC.toast('⏱️ «'+t.label+'» ist fertig!');
+      }
+    });
+    if(needSave) save();
+    if(needRender){ render(); return; }
+    var sorted=data.timers.slice().sort(function(a,b){return a.target-b.target;});
+    document.querySelectorAll('#timerList .timer-card').forEach(function(card){
+      var t=data.timers.find(function(x){return x.id===card.dataset.id;}); if(!t) return;
+      var rest=t.target-now;
+      var cnt=card.querySelector('[data-timer-count]');
+      if(cnt) cnt.textContent=fmtCount(rest);
+      var bar=card.querySelector('[data-timer-bar]');
+      if(bar){
+        var pct=Math.max(0,Math.min(100,(t.totalMin*60000-rest)/(t.totalMin*60000)*100));
+        bar.style.width=pct+'%';
+      }
+    });
+    var hc=document.querySelector('[data-home-count]');
+    if(hc && sorted.length) hc.textContent=fmtCount(sorted[0].target-now);
+  }
+  function ensureTick(){ if(!tickHandle) tickHandle=setInterval(tick,1000); }
+  document.getElementById('presetGrid').innerHTML=PRESETS.map(function(p,i){
+    return '<button data-preset="'+i+'">'+MC.esc(p.label)+'<small>'+fmtDur(p.min)+'</small></button>';
+  }).join('');
+  document.getElementById('presetGrid').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-preset]'); if(!b) return;
+    var p=PRESETS[parseInt(b.dataset.preset,10)];
+    start(p.label,p.min);
+  });
+  document.getElementById('timerCustomBtn').addEventListener('click',function(){
+    MC.openForm({
+      title:'Eigener Timer',
+      fields:[
+        {key:'label', label:'Bezeichnung', type:'text', required:true, placeholder:'z.B. Ballen akklimatisieren', errorMsg:'Bitte Bezeichnung angeben'},
+        {key:'h', label:'Stunden', type:'number', half:true, step:1, min:0, max:96},
+        {key:'m', label:'Minuten', type:'number', half:true, step:1, min:0, max:59}
+      ],
+      values:{h:0,m:20},
+      okLabel:'Starten',
+      validate:function(out){
+        var total=(MC.num(out.h,0)||0)*60+(MC.num(out.m,0)||0);
+        if(total<=0) return {key:'m', msg:'Dauer muss grösser als 0 sein'};
+        return null;
+      },
+      onSave:function(out){
+        start(out.label,(MC.num(out.h,0)||0)*60+(MC.num(out.m,0)||0));
+      }
+    });
+  });
+  document.getElementById('timerList').addEventListener('click',function(e){
+    var card=e.target.closest('.timer-card'); if(!card) return;
+    var t=data.timers.find(function(x){return x.id===card.dataset.id;}); if(!t) return;
+    if(e.target.closest('.tm-del')||e.target.closest('.tm-ok')) remove(t.id);
+    else if(e.target.closest('.tm-cal')) toCalendar(t);
+  });
+  /* Wake Lock — Bildschirm wachhalten (z.B. beim Backen) */
+  var wakeLock=null, wakeWanted=false;
+  var wlBtn=document.getElementById('wakeLockBtn');
+  function wlLabel(){ wlBtn.textContent='☀️ Bildschirm wachhalten: '+(wakeWanted?'an':'aus'); }
+  function requestWL(){
+    if(!('wakeLock' in navigator)){ MC.toast('Wird von diesem Browser nicht unterstützt.'); wakeWanted=false; wlLabel(); return; }
+    navigator.wakeLock.request('screen').then(function(wl){
+      wakeLock=wl;
+      wl.addEventListener('release',function(){ wakeLock=null; });
+    }).catch(function(){ wakeWanted=false; wlLabel(); MC.toast('Bildschirm-Wachhalten nicht möglich.'); });
+  }
+  wlBtn.addEventListener('click',function(){
+    wakeWanted=!wakeWanted;
+    wlLabel();
+    if(wakeWanted) requestWL();
+    else if(wakeLock){ wakeLock.release(); wakeLock=null; }
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){
+      if(wakeWanted && !wakeLock) requestWL();
+      tick();
+    }
+  });
+  return { render:render, ensureTick:ensureTick };
+})();
+
+/* ==================== EINSTELLUNGEN: Theme, Backup ==================== */
+(function(){
+var THEMES=['auto','light','dark'], THEME_LABEL={auto:'Auto', light:'Hell', dark:'Dunkel'};
+var themeBtn=document.getElementById('themeBtn');
+function applyTheme(t){
+  if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme',t);
+  else document.documentElement.removeAttribute('data-theme');
+  document.getElementById('themeSub').textContent=THEME_LABEL[t]||THEME_LABEL.auto;
+}
+var curTheme=MC.lsGet('ftk_theme'); if(THEMES.indexOf(curTheme)<0) curTheme='auto';
+applyTheme(curTheme);
+themeBtn.addEventListener('click',function(){
+  curTheme=THEMES[(THEMES.indexOf(curTheme)+1)%THEMES.length];
+  MC.lsSet('ftk_theme',curTheme);
+  applyTheme(curTheme);
+});
+
+var KEYS=['ftk_version','ftk_budget','ftk_tasks','ftk_calc','ftk_mode','ftk_theme','ftk_pizza'];
+function blobToDataURL(blob){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(){ resolve(r.result); };
+    r.onerror=function(){ reject(r.error); };
+    r.readAsDataURL(blob);
+  });
+}
+function downloadJSON(obj,filename){
+  var blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+function doExport(withPhotos){
+  var out={app:'pizza-mission-control', exportVersion:2, exportedAt:new Date().toISOString(), data:{}};
+  KEYS.forEach(function(k){ var v=MC.lsGet(k); if(v!==null) out.data[k]=v; });
+  var finish=function(){
+    downloadJSON(out,'mission-control-backup_'+MC.todayISO()+(withPhotos?'_mit-fotos':'')+'.json');
+    MC.bus.dispatchEvent(new CustomEvent('backupDone'));
+    MC.toast('Backup erstellt — Datei in iCloud/OneDrive ablegen oder an den PC schicken.');
+  };
+  if(!withPhotos){ finish(); return; }
+  PhotoDB.all().then(function(list){
+    return Promise.all(list.map(function(p){
+      return blobToDataURL(p.blob).then(function(durl){
+        return {id:p.id, batchId:p.batchId, ts:p.ts, dataUrl:durl};
+      });
+    }));
+  }).then(function(photos){
+    out.photos=photos;
+    finish();
+  }).catch(function(){
+    MC.toast('Fotos konnten nicht gelesen werden — Backup ohne Fotos erstellt.');
+    finish();
+  });
+}
+document.getElementById('exportBtn').addEventListener('click',function(){ doExport(false); });
+document.getElementById('exportPhotosBtn').addEventListener('click',function(){ doExport(true); });
+window.doExport=doExport;
+
+document.getElementById('importBtn').addEventListener('click',function(){ document.getElementById('importFile').click(); });
+document.getElementById('importFile').addEventListener('change',function(){
+  var file=this.files&&this.files[0]; this.value='';
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    var obj=null;
+    try{ obj=JSON.parse(reader.result); }catch(e){}
+    if(!obj || obj.app!=='pizza-mission-control' || !obj.data){
+      MC.toast('Datei nicht erkannt — bitte ein Mission-Control-Backup (.json) wählen.');
+      return;
+    }
+    var batchCount='?';
+    try{ var pz=JSON.parse(obj.data.ftk_pizza||'null'); if(pz&&pz.batches) batchCount=pz.batches.length; }catch(e){}
+    var when=obj.exportedAt?MC.fmtDateCH(String(obj.exportedAt).slice(0,10)):'unbekannt';
+    var nPhotos=Array.isArray(obj.photos)?obj.photos.length:0;
+    MC.confirmDlg({
+      title:'Backup wiederherstellen?',
+      text:'Backup vom '+when+' mit '+batchCount+' Batches'+(nPhotos?' und '+nPhotos+' Fotos':'')+' laden? Die aktuellen Daten auf diesem Gerät werden ersetzt (vorher wird intern eine Sicherung angelegt).',
+      okLabel:'Wiederherstellen', danger:true
+    },function(){
+      var JSON_KEYS=['ftk_version','ftk_budget','ftk_tasks','ftk_calc','ftk_pizza'];
+      var toWrite={},count=0;
+      KEYS.forEach(function(k){
+        var v=obj.data[k];
+        if(typeof v!=='string') return;
+        if(JSON_KEYS.indexOf(k)>=0){ try{ JSON.parse(v); }catch(e){ return; } }
+        toWrite[k]=v; count++;
+      });
+      if(count===0){ MC.toast('Backup enthält keine gültigen Daten — nichts geändert.'); return; }
+      var safety={};
+      KEYS.forEach(function(k){ var v=MC.lsGet(k); if(v!==null) safety[k]=v; });
+      MC.lsSet('ftk_preimport_backup',JSON.stringify({at:new Date().toISOString(), data:safety}));
+      KEYS.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+      Object.keys(toWrite).forEach(function(k){ MC.lsSet(k,toWrite[k]); });
+      var photoRestore=Promise.resolve();
+      if(nPhotos){
+        photoRestore=PhotoDB.clearAll().then(function(){
+          return Promise.all(obj.photos.map(function(p){
+            if(!p||!p.id||!p.dataUrl) return Promise.resolve();
+            return fetch(p.dataUrl).then(function(r){ return r.blob(); }).then(function(blob){
+              return PhotoDB.add({id:p.id, batchId:p.batchId, ts:p.ts||Date.now(), blob:blob});
+            });
+          }));
+        }).catch(function(){});
+      }
+      photoRestore.then(function(){ location.reload(); });
+    });
+  };
+  reader.readAsText(file);
+});
+})();
+
+/* ==================== START: Schnellaktionen, Install-Hinweis ==================== */
+(function(){
+document.getElementById('qaBatch').addEventListener('click',function(){
+  Nav.show('batches'); window.PizzaViews.openBatchForm(null);
+});
+document.getElementById('qaTimer').addEventListener('click',function(){ Nav.show('timer'); });
+document.getElementById('qaFoto').addEventListener('click',function(){
+  var sb=window.PizzaViews.sortedBatches();
+  if(!sb.length){ MC.toast('Noch kein Batch vorhanden — zuerst einen Batch anlegen.'); return; }
+  var latest=null;
+  data.batches.forEach(function(b){ if(!latest || (b.date||'')>(latest.date||'')) latest=b; });
+  PhotoUI.capture(latest.id);
+});
+document.getElementById('qaBackup').addEventListener('click',function(){ window.doExport(false); });
+
+/* Install-Hinweis nur zeigen, wenn nicht bereits als App installiert */
+var standalone=(window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+if(!standalone) document.getElementById('installHint').style.display='';
+
+/* Speicher dauerhaft anfordern (verhindert Aufräumen durch das OS) */
+if(navigator.storage && navigator.storage.persist){
+  navigator.storage.persist().then(function(granted){
+    var el=document.getElementById('persistStatus');
+    el.textContent=granted?'✓ Speicher ist als dauerhaft markiert.':'Speicher noch nicht als dauerhaft markiert — App installieren und regelmässig nutzen hilft.';
+  }).catch(function(){});
+}
+})();
+
+/* ==================== INIT ==================== */
+document.getElementById('sellPrice').value=data.settings.sellPrice;
+document.getElementById('appVersion').textContent='v'+APP_VERSION;
+window.PizzaViews.registerBatchActions();
+PhotoUI.refresh().then(function(){ window.PizzaViews.renderBatches(); });
+window.PizzaViews.renderBatches();
+window.PizzaViews.renderProcess();
+window.PizzaViews.renderCost();
+window.PizzaViews.renderTrouble();
+window.PizzaViews.renderRoadmap();
+window.PizzaViews.renderDecisions();
+window.PizzaViews.runCalc(false);
+updateKpis();
+Timers.render();
+if(data.timers.length) Timers.ensureTick();
+
+/* ==================== SERVICE WORKER ==================== */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    reg.addEventListener('updatefound',function(){
+      var nw=reg.installing;
+      if(!nw) return;
+      nw.addEventListener('statechange',function(){
+        if(nw.state==='installed' && navigator.serviceWorker.controller){
+          MC.toast('Update verfügbar',function(){ nw.postMessage('SKIP_WAITING'); },'Neu laden');
+        }
+      });
+    });
+  }).catch(function(){});
+  var swRefreshed=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(swRefreshed) return; swRefreshed=true; location.reload();
+  });
+}
+</script>
+</body>
+</html>
