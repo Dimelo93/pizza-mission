@@ -259,11 +259,11 @@ td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric
 .edit-row.total .er-val{font-family:var(--font-mono);font-size:15px;white-space:nowrap}
 .cost-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:var(--paper-raised)}
 .cost-card .cc-head{display:flex;align-items:center;gap:8px}
-.cost-card .cc-head input[type=text]{flex:1;min-width:0;font-size:15px;font-weight:600;padding:7px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ink)}
+.cost-card .cc-head input[type=text]{flex:1;min-width:0;font-size:16px;font-weight:600;padding:7px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ink)}
 .cost-card .cc-head input[type=text]:focus{border-color:var(--line);background:var(--paper)}
 .cost-card .cc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:7px}
 .cost-card .cc-grid .field{margin-bottom:0}
-.cost-card .cc-grid input{padding:8px 9px;font-size:15px;text-align:right;font-family:var(--font-mono)}
+.cost-card .cc-grid input{padding:8px 9px;font-size:16px;text-align:right;font-family:var(--font-mono)}
 .cost-card .cc-cost{margin-top:7px;font-size:12.5px;color:var(--ink-soft);display:flex;justify-content:space-between}
 .cost-card .cc-cost b{font-family:var(--font-mono)}
 
@@ -327,10 +327,10 @@ dialog.mc-dialog{border:none;border-radius:16px;padding:0;max-width:560px;width:
 dialog.mc-dialog::backdrop{background:rgba(20,14,8,.55);backdrop-filter:blur(2px)}
 dialog.mc-sheet{
   border:none;padding:0;background:var(--paper);color:var(--ink);
-  width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;
+  width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;margin:0;
 }
 dialog.mc-sheet::backdrop{background:rgba(20,14,8,.4)}
-.mc-sheet form{display:flex;flex-direction:column;height:100dvh}
+.mc-sheet form{display:flex;flex-direction:column;height:100vh;height:100dvh}
 .mc-sheet .dlg-head{
   padding:calc(12px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);
   background:var(--paper-raised);display:flex;align-items:center;gap:10px;position:sticky;top:0;
@@ -351,8 +351,8 @@ dialog.mc-dialog .dlg-foot{display:flex;gap:10px;padding:0 18px 16px}
 dialog.mc-dialog .dlg-foot .mc-btn{flex:1}
 
 /* Foto-Viewer */
-dialog.photo-view{border:none;padding:0;background:#000;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0}
-.photo-view .pv-wrap{display:flex;flex-direction:column;height:100dvh}
+dialog.photo-view{border:none;padding:0;background:#000;width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;margin:0}
+.photo-view .pv-wrap{display:flex;flex-direction:column;height:100vh;height:100dvh}
 .photo-view img{flex:1;object-fit:contain;min-height:0;width:100%}
 .photo-view .pv-bar{display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#111}
 .photo-view .pv-bar button{flex:1;border:1px solid #444;background:transparent;color:#eee;padding:11px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer}
@@ -390,7 +390,8 @@ dialog.photo-view{border:none;padding:0;background:#000;width:100vw;max-width:10
 <!-- ============ START ============ -->
 <section class="view active" id="view-home" data-title="Pizza Mission" data-sub="Foodtruck · Jan Wälchli">
   <div class="install-hint" id="installHint" style="display:none">
-    <b>Als App installieren:</b> In Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) tippen → <b>«Zum Home-Bildschirm»</b>. Danach startet Pizza Mission wie eine normale App — mit Icon, Vollbild und offline.
+    <b>Als App installieren:</b> In Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) tippen → <b>«Zum Home-Bildschirm»</b>. Danach startet Pizza Mission wie eine normale App — mit Icon, Vollbild und offline.<br>
+    <b>Wichtig:</b> Ohne Installation kann Safari alle lokalen Daten (Batches, Fotos) nach 7 Tagen ohne Nutzung löschen. Die installierte App hat zudem einen <b>eigenen Speicher</b> — hast du hier im Browser schon Daten erfasst, erstelle zuerst unter Mehr → Einstellungen ein <b>«Backup inkl. Fotos»</b> und lade es nach der Installation dort wieder.
   </div>
   <div class="quick-actions">
     <button id="qaBatch"><span class="qi">🍕</span>Neuer Batch</button>
@@ -756,6 +757,7 @@ dialog.photo-view{border:none;padding:0;background:#000;width:100vw;max-width:10
   <button class="mc-btn mc-btn-ghost mc-btn-block" id="importBtn">⬆ Backup laden</button>
   <p class="hint" id="settingsBackupStatus">–</p>
   <p class="hint" id="photoStats">–</p>
+  <button class="mc-btn mc-btn-ghost mc-btn-block" id="orphanBtn" style="display:none"></button>
   <h2 class="section-title">Info</h2>
   <div class="card" style="font-size:13px">
     <p style="margin:0 0 6px"><strong>Pizza Foodtruck Mission</strong> · <span id="appVersion">v1</span></p>
@@ -941,10 +943,54 @@ var MC=(function(){
     form.querySelector('#mcDlgCancel').addEventListener('click',function(){ dlg.close(); dlg.remove(); });
     document.body.appendChild(dlg);
     dlg.showModal();
+
+    /* iOS-Tastatur verdeckt sonst die Fusszeile: Platz nach unten schaffen,
+       solange die Bildschirmtastatur den sichtbaren Viewport verkleinert. */
+    var vv=window.visualViewport;
+    function kbAdjust(){
+      if(!vv) return;
+      var overlap=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+      body.style.paddingBottom=overlap>40?(overlap+24)+'px':'';
+    }
+    if(vv){ vv.addEventListener('resize',kbAdjust); vv.addEventListener('scroll',kbAdjust); }
+    body.addEventListener('focusin',function(ev){
+      var t=ev.target;
+      setTimeout(function(){ try{ t.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },250);
+    });
+    dlg.addEventListener('close',function(){
+      if(vv){ vv.removeEventListener('resize',kbAdjust); vv.removeEventListener('scroll',kbAdjust); }
+    });
+  }
+
+  /* ---- Datei an den Nutzer ausliefern ----
+     iOS-Standalone-Apps haben keinen Download-Manager: a[download] verpufft dort still.
+     Deshalb bevorzugt über das Teilen-Blatt (Web Share API mit Datei), sonst klassischer Download.
+     onDone(true) = Datei wurde geteilt/heruntergeladen, onDone(false) = Nutzer hat abgebrochen. */
+  function legacyDownload(blob,filename){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+  }
+  function deliverFile(blob,filename,onDone){
+    onDone=onDone||function(){};
+    var file=null;
+    try{ file=new File([blob],filename,{type:blob.type||'application/octet-stream'}); }catch(e){}
+    if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file]}).then(function(){ onDone(true); }).catch(function(err){
+        if(err && err.name==='AbortError'){ onDone(false); return; }
+        legacyDownload(blob,filename); onDone(true);
+      });
+      return;
+    }
+    legacyDownload(blob,filename);
+    onDone(true);
   }
 
   return { bus:bus,loadJSON:loadJSON,saveJSON:saveJSON,lsGet:lsGet,lsSet:lsSet,num:num,esc:esc,fmt:fmt,
-           todayISO:todayISO,fmtDateCH:fmtDateCH,uid:uid,toast:toast,confirmDlg:confirmDlg,openForm:openForm };
+           todayISO:todayISO,fmtDateCH:fmtDateCH,uid:uid,toast:toast,confirmDlg:confirmDlg,openForm:openForm,
+           deliverFile:deliverFile };
 })();
 
 /* ==================== NAVIGATION (Tabbar + Unterseiten) ==================== */
@@ -1476,15 +1522,20 @@ document.getElementById('calcResetBtn').addEventListener('click',function(){
     calcTouched=[];
     rIds.forEach(function(id){ calcValues[id]=rDefaults[id]; document.getElementById(id).value=rDefaults[id]; });
     recalcBudget();
+    /* Kopplung sofort wieder anwenden, damit rCogs nicht erst beim nächsten Start springt */
+    if(window.PizzaViews) window.PizzaViews.renderCost();
     MC.toast('Rechner auf Standardwerte zurückgesetzt');
   });
 });
 
-/* ---- Live-Wareneinsatz aus dem Pizza-System ---- */
+/* ---- Live-Wareneinsatz aus dem Pizza-System ----
+   Der 0.70-Aufschlag (Gas/Verpackung) gilt nur, solange die Pauschal-Positionen
+   in der Kostenkalkulation leer sind — sonst wären sie doppelt gezählt. */
 MC.bus.addEventListener('pizzaCost',function(e){
   var cost=e.detail.total;
+  var extras=num(e.detail.extras,0);
   if(calcTouched.indexOf('rCogs')<0){
-    var mixed=Math.round((cost+0.70)*100)/100;
+    var mixed=Math.round((cost+Math.max(0,0.70-extras))*100)/100;
     calcValues.rCogs=mixed;
     document.getElementById('rCogs').value=mixed;
     recalc();
@@ -1697,13 +1748,22 @@ function openBatchForm(existing){
   });
 }
 function deleteBatch(b){
-  MC.confirmDlg({title:'Batch löschen?',text:'Batch '+b.id+' vom '+MC.fmtDateCH(b.date)+' wirklich löschen? Das Batch-Log ist Teil deiner Rückverfolgbarkeit.',okLabel:'Löschen',danger:true},function(){
+  MC.confirmDlg({title:'Batch löschen?',text:'Batch '+b.id+' vom '+MC.fmtDateCH(b.date)+' wirklich löschen (inkl. Fotos)? Das Batch-Log ist Teil deiner Rückverfolgbarkeit.',okLabel:'Löschen',danger:true},function(){
     var idx=data.batches.indexOf(b);
-    data.batches.splice(idx,1);
-    save(); renderBatches();
-    MC.toast('Batch '+b.id+' gelöscht',function(){
-      data.batches.splice(Math.min(idx,data.batches.length),0,b);
-      save(); renderBatches();
+    /* Fotos mitlöschen, aber für «Rückgängig» im Speicher behalten */
+    PhotoDB.forBatch(b.id).then(function(photoList){
+      return Promise.all(photoList.map(function(p){ return PhotoDB.del(p.id); })).then(function(){ return photoList; });
+    }).catch(function(){ return []; }).then(function(photoList){
+      data.batches.splice(idx,1);
+      save();
+      PhotoUI.refresh().then(renderBatches);
+      renderBatches();
+      MC.toast('Batch '+b.id+' gelöscht',function(){
+        data.batches.splice(Math.min(idx,data.batches.length),0,b);
+        Promise.all(photoList.map(function(p){ return PhotoDB.add(p); })).catch(function(){})
+          .then(function(){ return PhotoUI.refresh(); })
+          .then(function(){ save(); renderBatches(); });
+      });
     });
   });
 }
@@ -1805,7 +1865,7 @@ function renderCost(){
   runCost();
 }
 function runCost(){
-  var total=0;
+  var total=0, extrasSum=0;
   document.querySelectorAll('#costList .cost-card').forEach(function(tr){
     var ing=data.ingredients.find(function(x){return x.id===tr.dataset.id;}); if(!ing) return;
     var perG=num(ing.unit,1)>0?num(ing.price,0)/num(ing.unit,1):0;
@@ -1816,6 +1876,7 @@ function runCost(){
   document.querySelectorAll('#extraList .cost-card').forEach(function(tr){
     var ex=data.extras.find(function(x){return x.id===tr.dataset.id;}); if(!ex) return;
     total+=num(ex.price,0);
+    extrasSum+=num(ex.price,0);
     tr.querySelector('.c-cost').textContent='CHF '+fmt(num(ex.price,0),3);
   });
   var sell=num(data.settings.sellPrice,0);
@@ -1826,7 +1887,7 @@ function runCost(){
   document.getElementById('kpiMargin').textContent='CHF '+fmt(margin,2);
   var pct=sell>0?(margin/sell*100):0;
   document.getElementById('kpiMarginPct').textContent='bei CHF '+fmt(sell,2)+' Verkaufspreis · '+fmt(pct,0)+' %';
-  MC.bus.dispatchEvent(new CustomEvent('pizzaCost',{detail:{total:total}}));
+  MC.bus.dispatchEvent(new CustomEvent('pizzaCost',{detail:{total:total,extras:extrasSum}}));
 }
 document.getElementById('view-kosten').addEventListener('input',function(e){
   if(e.target.id==='sellPrice'){
@@ -2111,9 +2172,17 @@ window.PizzaViews={
 })();
 
 /* ==================== KPIs, Backup-Status ==================== */
-function updateKpis(){
+/* Neuester Batch — Gleichstand beim Datum wird wie in sortedBatches über die ID aufgelöst */
+function latestBatch(){
   var latest=null;
-  data.batches.forEach(function(b){ if(!latest || (b.date||'')>(latest.date||'')) latest=b; });
+  data.batches.forEach(function(b){
+    var k=(b.date||'')+'|'+(b.id||'');
+    if(!latest || k>((latest.date||'')+'|'+(latest.id||''))) latest=b;
+  });
+  return latest;
+}
+function updateKpis(){
+  var latest=latestBatch();
   if(latest){
     document.getElementById('kpiLastBatch').innerHTML=MC.esc(latest.id)+(latest.result!=null&&latest.result!==''?' <small>'+MC.esc(String(latest.result))+'/10</small>':'');
     document.getElementById('kpiLastBatchSub').textContent=MC.fmtDateCH(latest.date)+(latest.flour?' · '+latest.flour:'')+(latest.ballWeight?', '+latest.ballWeight+' g':'');
@@ -2148,12 +2217,34 @@ PhotoUI=(function(){
       renderPhotoStats(all);
     }).catch(function(){});
   }
+  var orphanIds=[];
   function renderPhotoStats(all){
     var el=document.getElementById('photoStats');
+    /* Verwaiste Fotos erkennen: batchId existiert nicht (mehr) — z.B. nach
+       Umbenennung am Desktop oder Import eines Backups mit anderer Batch-Liste */
+    var known={}; data.batches.forEach(function(b){ known[b.id]=1; });
+    orphanIds=(all||[]).filter(function(p){ return !known[p.batchId]; }).map(function(p){ return p.id; });
+    var btn=document.getElementById('orphanBtn');
+    if(orphanIds.length){
+      btn.style.display='';
+      btn.textContent='🧹 '+orphanIds.length+' verwaiste Foto'+(orphanIds.length===1?'':'s')+' löschen (Batch existiert nicht mehr)';
+    } else btn.style.display='none';
     if(!all||!all.length){ el.textContent='Noch keine Batch-Fotos gespeichert.'; return; }
     var bytes=0; all.forEach(function(p){ bytes+=(p.blob&&p.blob.size)||0; });
     el.textContent=all.length+' Batch-Foto'+(all.length===1?'':'s')+' gespeichert ('+MC.fmt(bytes/1048576,1)+' MB) — nur im «Backup inkl. Fotos» enthalten.';
   }
+  document.getElementById('orphanBtn').addEventListener('click',function(){
+    if(!orphanIds.length) return;
+    MC.confirmDlg({
+      title:'Verwaiste Fotos löschen?',
+      text:orphanIds.length+' Foto'+(orphanIds.length===1?' gehört':'s gehören')+' zu Batch-Nummern, die es nicht mehr gibt (z.B. nach Umbenennung am PC oder einem Import). Endgültig löschen?',
+      okLabel:'Löschen', danger:true
+    },function(){
+      Promise.all(orphanIds.map(function(id){ return PhotoDB.del(id); })).catch(function(){})
+        .then(function(){ return refreshCounts(); })
+        .then(function(){ window.PizzaViews.renderBatches(); MC.toast('Verwaiste Fotos gelöscht'); });
+    });
+  });
   function url(p){
     if(!urls[p.id]) urls[p.id]=URL.createObjectURL(p.blob);
     return urls[p.id];
@@ -2251,23 +2342,33 @@ var Timers=(function(){
   ];
   var tickHandle=null;
   var audioCtx=null;
+  /* Bei jeder Geste (billig) sicherstellen, dass der Context existiert und läuft —
+     iOS setzt ihn nach Hintergrund/Sperrbildschirm auf 'interrupted'/'suspended'. */
   document.addEventListener('pointerdown',function(){
-    try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
-  },{once:true});
+    try{
+      audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx && audioCtx.state!=='running') audioCtx.resume().catch(function(){});
+    }catch(e){}
+  });
   function beep(){
     if(!audioCtx) return;
+    function play(){
+      try{
+        var t=audioCtx.currentTime;
+        [0,0.4,0.8].forEach(function(off){
+          var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+          o.type='sine'; o.frequency.value=880;
+          g.gain.setValueAtTime(0.0001,t+off);
+          g.gain.exponentialRampToValueAtTime(0.4,t+off+0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+off+0.35);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(t+off); o.stop(t+off+0.4);
+        });
+      }catch(e){}
+    }
     try{
-      if(audioCtx.state==='suspended') audioCtx.resume();
-      var t=audioCtx.currentTime;
-      [0,0.4,0.8].forEach(function(off){
-        var o=audioCtx.createOscillator(), g=audioCtx.createGain();
-        o.type='sine'; o.frequency.value=880;
-        g.gain.setValueAtTime(0.0001,t+off);
-        g.gain.exponentialRampToValueAtTime(0.4,t+off+0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001,t+off+0.35);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(t+off); o.stop(t+off+0.4);
-      });
+      if(audioCtx.state!=='running'){ audioCtx.resume().then(play).catch(function(){}); }
+      else play();
     }catch(e){}
   }
   function fmtCount(ms){
@@ -2295,7 +2396,7 @@ var Timers=(function(){
     var idx=data.timers.findIndex(function(t){return t.id===id;}); if(idx<0) return;
     data.timers.splice(idx,1); save(); render();
   }
-  function icsEscape(s){ return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,'); }
+  function icsEscape(s){ return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r\n|\r|\n/g,'\\n'); }
   function icsDate(ms){
     var d=new Date(ms);
     return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate()).padStart(2,'0')+
@@ -2310,12 +2411,10 @@ var Timers=(function(){
       'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEscape(t.label),'TRIGGER:-PT0M','END:VALARM',
       'END:VEVENT','END:VCALENDAR'];
     var blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='timer-'+t.label.replace(/[^a-z0-9äöü]+/gi,'-').toLowerCase()+'.ics';
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
-    MC.toast('Kalender-Datei erstellt — im Dialog «Zu Kalender hinzufügen» wählen.');
+    var fname='timer-'+t.label.replace(/[^a-z0-9äöü]+/gi,'-').toLowerCase()+'.ics';
+    MC.deliverFile(blob,fname,function(ok){
+      if(ok) MC.toast('Kalender-Datei erstellt — «Zu Kalender hinzufügen» bzw. Kalender-App wählen.');
+    });
   }
   function render(){
     var wrap=document.getElementById('timerList');
@@ -2434,6 +2533,7 @@ var Timers=(function(){
   document.addEventListener('visibilitychange',function(){
     if(document.visibilityState==='visible'){
       if(wakeWanted && !wakeLock) requestWL();
+      if(audioCtx && audioCtx.state!=='running'){ try{ audioCtx.resume().catch(function(){}); }catch(e){} }
       tick();
     }
   });
@@ -2466,23 +2566,19 @@ function blobToDataURL(blob){
     r.readAsDataURL(blob);
   });
 }
-function downloadJSON(obj,filename){
+function deliverJSON(obj,filename){
   var blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+  MC.deliverFile(blob,filename,function(ok){
+    if(!ok){ MC.toast('Backup abgebrochen.'); return; }
+    MC.bus.dispatchEvent(new CustomEvent('backupDone'));
+    MC.toast('Backup erstellt — Datei in iCloud/OneDrive ablegen oder an den PC schicken.');
+  });
 }
 function doExport(withPhotos){
   var out={app:'pizza-mission-control', exportVersion:2, exportedAt:new Date().toISOString(), data:{}};
   KEYS.forEach(function(k){ var v=MC.lsGet(k); if(v!==null) out.data[k]=v; });
-  var finish=function(){
-    downloadJSON(out,'mission-control-backup_'+MC.todayISO()+(withPhotos?'_mit-fotos':'')+'.json');
-    MC.bus.dispatchEvent(new CustomEvent('backupDone'));
-    MC.toast('Backup erstellt — Datei in iCloud/OneDrive ablegen oder an den PC schicken.');
-  };
-  if(!withPhotos){ finish(); return; }
+  var fname='mission-control-backup_'+MC.todayISO()+(withPhotos?'_mit-fotos':'')+'.json';
+  if(!withPhotos){ deliverJSON(out,fname); return; }
   PhotoDB.all().then(function(list){
     return Promise.all(list.map(function(p){
       return blobToDataURL(p.blob).then(function(durl){
@@ -2491,10 +2587,16 @@ function doExport(withPhotos){
     }));
   }).then(function(photos){
     out.photos=photos;
-    finish();
+    if(!photos.length){ deliverJSON(out,fname); return; }
+    /* Extra-Bestätigung = frische Nutzer-Geste, damit das iOS-Teilen-Blatt sicher erscheint */
+    MC.confirmDlg({
+      title:'Backup bereit',
+      text:photos.length+' Foto'+(photos.length===1?'':'s')+' eingepackt. Jetzt speichern/teilen?',
+      okLabel:'Speichern'
+    },function(){ deliverJSON(out,fname); });
   }).catch(function(){
     MC.toast('Fotos konnten nicht gelesen werden — Backup ohne Fotos erstellt.');
-    finish();
+    deliverJSON(out,fname);
   });
 }
 document.getElementById('exportBtn').addEventListener('click',function(){ doExport(false); });
@@ -2516,10 +2618,14 @@ document.getElementById('importFile').addEventListener('change',function(){
     var batchCount='?';
     try{ var pz=JSON.parse(obj.data.ftk_pizza||'null'); if(pz&&pz.batches) batchCount=pz.batches.length; }catch(e){}
     var when=obj.exportedAt?MC.fmtDateCH(String(obj.exportedAt).slice(0,10)):'unbekannt';
-    var nPhotos=Array.isArray(obj.photos)?obj.photos.length:0;
+    var photosRaw=Array.isArray(obj.photos)?obj.photos.filter(function(p){
+      return p && p.id && typeof p.dataUrl==='string' && /^data:image\//i.test(p.dataUrl);
+    }):[];
+    var nPhotos=photosRaw.length;
     MC.confirmDlg({
       title:'Backup wiederherstellen?',
-      text:'Backup vom '+when+' mit '+batchCount+' Batches'+(nPhotos?' und '+nPhotos+' Fotos':'')+' laden? Die aktuellen Daten auf diesem Gerät werden ersetzt (vorher wird intern eine Sicherung angelegt).',
+      text:'Backup vom '+when+' mit '+batchCount+' Batches'+(nPhotos?' und '+nPhotos+' Fotos':'')+' laden? Die aktuellen Daten auf diesem Gerät werden ersetzt (von den Daten — ohne Fotos — wird vorher intern eine Sicherung angelegt). '+
+        (nPhotos?('Die '+nPhotos+' Fotos aus dem Backup ersetzen ALLE vorhandenen Batch-Fotos.'):'Vorhandene Batch-Fotos auf diesem Gerät bleiben erhalten.'),
       okLabel:'Wiederherstellen', danger:true
     },function(){
       var JSON_KEYS=['ftk_version','ftk_budget','ftk_tasks','ftk_calc','ftk_pizza'];
@@ -2531,23 +2637,33 @@ document.getElementById('importFile').addEventListener('change',function(){
         toWrite[k]=v; count++;
       });
       if(count===0){ MC.toast('Backup enthält keine gültigen Daten — nichts geändert.'); return; }
-      var safety={};
-      KEYS.forEach(function(k){ var v=MC.lsGet(k); if(v!==null) safety[k]=v; });
-      MC.lsSet('ftk_preimport_backup',JSON.stringify({at:new Date().toISOString(), data:safety}));
-      KEYS.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
-      Object.keys(toWrite).forEach(function(k){ MC.lsSet(k,toWrite[k]); });
-      var photoRestore=Promise.resolve();
-      if(nPhotos){
-        photoRestore=PhotoDB.clearAll().then(function(){
-          return Promise.all(obj.photos.map(function(p){
-            if(!p||!p.id||!p.dataUrl) return Promise.resolve();
-            return fetch(p.dataUrl).then(function(r){ return r.blob(); }).then(function(blob){
-              return PhotoDB.add({id:p.id, batchId:p.batchId, ts:p.ts||Date.now(), blob:blob});
-            });
-          }));
-        }).catch(function(){});
-      }
-      photoRestore.then(function(){ location.reload(); });
+      /* Fotos ZUERST vollständig zu Blobs konvertieren — scheitert das,
+         wird der Import abgebrochen, ohne irgendetwas anzufassen. */
+      var prep=nPhotos?Promise.all(photosRaw.map(function(p){
+        return fetch(p.dataUrl).then(function(r){ return r.blob(); }).then(function(blob){
+          return {id:p.id, batchId:p.batchId, ts:p.ts||Date.now(), blob:blob};
+        });
+      })):Promise.resolve(null);
+      prep.then(function(photoList){
+        var safety={};
+        KEYS.forEach(function(k){ var v=MC.lsGet(k); if(v!==null) safety[k]=v; });
+        MC.lsSet('ftk_preimport_backup',JSON.stringify({at:new Date().toISOString(), data:safety}));
+        KEYS.forEach(function(k){
+          /* Reine Präferenzen behalten, wenn das Backup sie nicht enthält (z.B. iPhone-Backup ohne ftk_mode) */
+          if((k==='ftk_mode'||k==='ftk_theme') && toWrite[k]===undefined) return;
+          try{ localStorage.removeItem(k); }catch(e){}
+        });
+        Object.keys(toWrite).forEach(function(k){ MC.lsSet(k,toWrite[k]); });
+        var photoWrite=photoList?PhotoDB.clearAll().then(function(){
+          return Promise.all(photoList.map(function(ph){ return PhotoDB.add(ph); }));
+        }):Promise.resolve();
+        photoWrite.then(
+          function(){ location.reload(); },
+          function(){ MC.lsSet('ftk_import_photo_warn','1'); location.reload(); }
+        );
+      },function(){
+        MC.toast('Fotos im Backup konnten nicht gelesen werden — Import abgebrochen, nichts geändert.');
+      });
     });
   };
   reader.readAsText(file);
@@ -2561,10 +2677,9 @@ document.getElementById('qaBatch').addEventListener('click',function(){
 });
 document.getElementById('qaTimer').addEventListener('click',function(){ Nav.show('timer'); });
 document.getElementById('qaFoto').addEventListener('click',function(){
-  var sb=window.PizzaViews.sortedBatches();
-  if(!sb.length){ MC.toast('Noch kein Batch vorhanden — zuerst einen Batch anlegen.'); return; }
-  var latest=null;
-  data.batches.forEach(function(b){ if(!latest || (b.date||'')>(latest.date||'')) latest=b; });
+  var latest=latestBatch();
+  if(!latest){ MC.toast('Noch kein Batch vorhanden — zuerst einen Batch anlegen.'); return; }
+  MC.toast('Foto wird '+latest.id+' zugeordnet');
   PhotoUI.capture(latest.id);
 });
 document.getElementById('qaBackup').addEventListener('click',function(){ window.doExport(false); });
@@ -2577,7 +2692,11 @@ if(!standalone) document.getElementById('installHint').style.display='';
 if(navigator.storage && navigator.storage.persist){
   navigator.storage.persist().then(function(granted){
     var el=document.getElementById('persistStatus');
-    el.textContent=granted?'✓ Speicher ist als dauerhaft markiert.':'Speicher noch nicht als dauerhaft markiert — App installieren und regelmässig nutzen hilft.';
+    if(!standalone){
+      el.textContent='⚠️ Im Browser-Tab kann iOS die Daten nach 7 Tagen ohne Nutzung löschen — App installieren («Zum Home-Bildschirm») und regelmässig Backups machen.';
+      return;
+    }
+    el.textContent=granted?'✓ Speicher ist als dauerhaft markiert.':'Speicher noch nicht als dauerhaft markiert — regelmässige Nutzung und Backups empfohlen.';
   }).catch(function(){});
 }
 })();
@@ -2585,6 +2704,10 @@ if(navigator.storage && navigator.storage.persist){
 /* ==================== INIT ==================== */
 document.getElementById('sellPrice').value=data.settings.sellPrice;
 document.getElementById('appVersion').textContent='v'+APP_VERSION;
+if(MC.lsGet('ftk_import_photo_warn')){
+  try{ localStorage.removeItem('ftk_import_photo_warn'); }catch(e){}
+  MC.toast('⚠️ Beim Import konnten nicht alle Fotos wiederhergestellt werden (Speicher voll?).');
+}
 window.PizzaViews.registerBatchActions();
 PhotoUI.refresh().then(function(){ window.PizzaViews.renderBatches(); });
 window.PizzaViews.renderBatches();
@@ -2611,8 +2734,13 @@ if('serviceWorker' in navigator){
       });
     });
   }).catch(function(){});
+  /* Beim Erstbesuch übernimmt der frisch aktivierte SW die Seite (clients.claim) —
+     das darf KEINEN Reload auslösen, sonst gehen offene Formulareingaben verloren.
+     Reload nur, wenn die Seite vorher schon kontrolliert war (echtes Update). */
+  var hadController=!!navigator.serviceWorker.controller;
   var swRefreshed=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(!hadController){ hadController=true; return; }
     if(swRefreshed) return; swRefreshed=true; location.reload();
   });
 }

@@ -35,16 +35,19 @@ self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+  /* refresh inkl. cache.put an waitUntil binden — sonst beendet iOS den SW,
+     sobald die Antwort aus dem Cache raus ist, und der Cache wird nie aufgefrischt */
+  var refresh = fetch(e.request).then(function (res) {
+    if (res && res.ok) {
+      var copy = res.clone();
+      return caches.open(CACHE).then(function (c) { return c.put(e.request, copy); }).then(function () { return res; });
+    }
+    return res;
+  });
+  e.waitUntil(refresh.catch(function () {}));
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
-      var refresh = fetch(e.request).then(function (res) {
-        if (res && res.ok) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        }
-        return res;
-      }).catch(function () { return hit; });
       return hit || refresh;
-    })
+    }).catch(function () { return refresh; })
   );
 });
