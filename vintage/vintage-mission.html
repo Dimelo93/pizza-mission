@@ -211,7 +211,7 @@ main{padding:20px 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 26px
 .btn.quiet{background:transparent;color:var(--ink-soft);border-color:transparent;padding:7px 10px}
 .btn.wide{width:100%}
 .btn.sm{padding:6px 13px;font-size:12.5px}
-.btn.danger{background:var(--stop);border-color:var(--stop);color:#fff}
+.btn.danger{background:var(--stop);border-color:var(--stop);color:var(--paper-raised)}
 .btnrow{display:flex;gap:9px;flex-wrap:wrap}
 
 /* ---------- Formulare ---------- */
@@ -418,6 +418,15 @@ table.kv td.num{white-space:nowrap;width:1%}
 }
 .toast.on{opacity:1}
 @media(min-width:900px){.toast{bottom:26px}}
+/* ---------- Bedienbarkeit ---------- */
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.tabbar button:focus-visible,.sidenav button:focus-visible{outline-offset:-3px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
 @media print{.topbar,.tabbar,.sidenav,.btnrow{display:none}.view{display:block!important}}
 
 </style>
