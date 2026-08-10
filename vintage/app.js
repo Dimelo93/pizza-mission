@@ -86,7 +86,7 @@ function fresh(){
     legal: SEED.legal.map(function(l, i){ return { id:'l'+(i+1), done:false, note:'' }; }),
     items: [],
     hours: [],
-    decisions: []
+    decisions: JSON.parse(JSON.stringify(SEED.decisions || []))
   };
   return st;
 }
@@ -108,6 +108,14 @@ function load(){
     st.items = st.items || [];
     st.hours = st.hours || [];
     st.decisions = st.decisions || [];
+    /* Startentscheide nachziehen, ohne eigene Einträge anzufassen */
+    (SEED.decisions || []).forEach(function(d){
+      if(!st.decisions.some(function(x){ return x.id === d.id; })) st.decisions.push(JSON.parse(JSON.stringify(d)));
+    });
+    /* Platzhalternamen der ersten Fassung durch die richtigen ersetzen */
+    st.team.forEach(function(pers, i){
+      if(/^Partner [0-9]+$/.test(pers.name) && SEED.team[i]) pers.name = SEED.team[i].name;
+    });
     Object.keys(SEED.settings).forEach(function(k){
       if(st.settings[k] === undefined) st.settings[k] = SEED.settings[k];
     });

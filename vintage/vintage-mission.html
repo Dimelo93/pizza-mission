@@ -515,8 +515,8 @@ var SEED = {};
 /* ---------------------------------------------------------------- Team ---- */
 SEED.team = [
   { id:'jan', name:'Jan',       role:'Motor — Einkauf, Fotografie, Shop-Inhalte, Zahlen, RAV', hours:15 },
-  { id:'p2',  name:'Partner 2', role:'Handel — Uhrenhändler, Verhandlung, Preise, Buchhaltung', hours:5 },
-  { id:'p3',  name:'Partner 3', role:'Prüfer — Echtheit, Vergleichspreise, Texte, Zweitmeinung', hours:3 }
+  { id:'p2',  name:'Luan',      role:'Handel — Uhrenhändler, Verhandlung, Preise, Buchhaltung', hours:5 },
+  { id:'p3',  name:'Mattia',    role:'Prüfer — Echtheit, Vergleichspreise, Texte, Zweitmeinung', hours:3 }
 ];
 
 /* ------------------------------------------------------------- Annahmen ---- */
@@ -630,8 +630,8 @@ SEED.tasks = [
     d:'Verpackung, Postprodukt, Preis für den Kunden, Laufzeit, Sendungsverfolgung. Einmal echt durchspielen und die Zeit messen.' },
   { p:'f2', w:'jan', due:'2026-09-21', est:240, t:'Instagram: 12 Beiträge vorproduzieren',
     d:'Ab Woche 4 dreimal wöchentlich. Zum Launch braucht ihr Publikum, nicht erst dann Publikum aufbauen.' },
-  { p:'f2', w:'jan', due:'2026-09-21', est:30,  t:'Kontrollgruppe festlegen: 10 von 30 Stück auf Ricardo',
-    d:'Ohne Vergleichskanal misst der Test nur eure Reichweite. Mit Kontrollgruppe wisst ihr nach 90 Tagen, ob das Problem der Einkauf oder der Kanal war. Das ist der Unterschied zwischen einer Zahl und einer Erkenntnis.' },
+  { p:'f2', w:'jan', due:'2026-09-21', est:60,  t:'Kontrollgruppe vorbereiten: Ricardo-Konto und die 10 Stück auswählen',
+    d:'Entschieden am 10.08.2026. Die 10 Stück quer durch Marken, Kategorien und Preislagen ziehen, nicht die Ladenhüter aussortieren — sonst vergleicht ihr am Ende zwei verschiedene Sortimente. Preise identisch zum Shop.' },
   { p:'f2', w:'p3',  due:'2026-09-27', est:45,  t:'Testbestellung durch eine externe Person',
     d:'Jemand von aussen bestellt, zahlt und erhält ein Stück. Alles, was dabei hakt, hakt später bei jedem Kunden.' },
 
@@ -797,6 +797,17 @@ SEED.doc = [
 ]}
 ];
 
+/* --------------------------------------------------- Entscheide (Start) ---- */
+/* Feste ids, damit sie beim Nachladen nicht doppelt angelegt werden. */
+SEED.decisions = [
+  { id:'d-kanal', date:'2026-08-10', by:'jan',
+    title:'Verkauf über die eigene Website, mit Kontrollgruppe auf Ricardo',
+    text:'20 der 30 Stück gehen in den eigenen Shop, 10 zu identischen Preisen auf Ricardo.\n\nGrund: Eine neue Website hat am ersten Tag keine Besucher. Ohne Vergleichskanal würde die 90-Tage-Messung die Reichweite messen statt die Einkaufsqualität, und der Test wäre wertlos. Verkauft die Kontrollgruppe deutlich besser, liegt das Problem bei der Reichweite und der Einkauf stimmt. Verkauft sie auch schlecht, war der Einkauf falsch.\n\nVerworfene Alternative: alle 30 Stück nur im eigenen Shop.' },
+  { id:'d-rollen', date:'2026-08-10', by:'jan',
+    title:'Rollen und Ausgleich bei ungleicher Zeit',
+    text:'Jan rund 15 Stunden pro Woche und alles mit Termindruck. Luan rund 5 Stunden, planbar terminiert: Uhrenhändler, Verträge, Preise, Buchhaltung. Mattia rund 3 Stunden, ausschliesslich asynchron ohne Frist, in den ersten Wochen auch mal null.\n\nAusgleich: erfasste Stunden werden mit CHF 25 als Vorwegvergütung aus dem Gewinn abgegolten, der Rest zu je einem Drittel. Fällt kein Gewinn an, fällt die Vergütung aus — es entsteht nie eine Lohnschuld. Die Einlagen von je CHF 900 bleiben davon getrennt und werden vor jeder Gewinnverteilung zurückgezahlt.' }
+];
+
 /* =========================================================================
    VINTAGE MISSION — Anwendungslogik
    Vanilla JS, keine Abhängigkeiten. Daten liegen im localStorage des Geräts.
@@ -885,7 +896,7 @@ function fresh(){
     legal: SEED.legal.map(function(l, i){ return { id:'l'+(i+1), done:false, note:'' }; }),
     items: [],
     hours: [],
-    decisions: []
+    decisions: JSON.parse(JSON.stringify(SEED.decisions || []))
   };
   return st;
 }
@@ -907,6 +918,14 @@ function load(){
     st.items = st.items || [];
     st.hours = st.hours || [];
     st.decisions = st.decisions || [];
+    /* Startentscheide nachziehen, ohne eigene Einträge anzufassen */
+    (SEED.decisions || []).forEach(function(d){
+      if(!st.decisions.some(function(x){ return x.id === d.id; })) st.decisions.push(JSON.parse(JSON.stringify(d)));
+    });
+    /* Platzhalternamen der ersten Fassung durch die richtigen ersetzen */
+    st.team.forEach(function(pers, i){
+      if(/^Partner [0-9]+$/.test(pers.name) && SEED.team[i]) pers.name = SEED.team[i].name;
+    });
     Object.keys(SEED.settings).forEach(function(k){
       if(st.settings[k] === undefined) st.settings[k] = SEED.settings[k];
     });
