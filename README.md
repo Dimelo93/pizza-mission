@@ -1,7 +1,24 @@
+# Mission-Apps
+
+Zwei Werkzeuge im selben Repository. Beide sind statische PWAs ohne Build-Schritt,
+beide speichern lokal auf dem Gerät.
+
+| Ordner | App | Stand |
+|---|---|---|
+| `/` | 🍕 Pizza Foodtruck Mission | parkiert |
+| `/vintage/` | Vintage Mission — Webshop für exklusives Vintage, Uhren und Bänder | aktiv |
+
+→ [Vintage Mission](vintage/README.md)
+
+---
+
 # 🍕 Pizza Foodtruck Mission — iPhone-App (PWA)
 
 Mobile Version des Mission-Control-Dashboards von Jan Wälchli: Batch-Log mit Fotos,
 Teig-Rechner, Teig-Timer, Kostenkalkulation, Budget, Fahrplan und Wirtschaftlichkeitsrechner.
+
+Das Foodtruck-Projekt ist parkiert. Die App bleibt unverändert liegen, damit die
+erfassten Daten und Batches erhalten bleiben.
 
 ## Installation auf dem iPhone
 
