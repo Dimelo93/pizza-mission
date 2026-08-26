@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vintage Mission">
+<meta name="theme-color" content="#faf8f4">
+<meta name="description" content="Arbeitswerkzeug für den Vintage-Webshop: Fahrplan, Aufgaben, Kaufentscheid, Artikel-Log, Zahlen, Recht.">
+<title>Vintage Mission</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <b>Vintage Mission</b>
+      <span>Kleider · Uhren · Bänder</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="themebtn" title="Hell, dunkel oder Systemeinstellung" aria-label="Darstellung wechseln">◐</button>
+  </div>
+</header>
+
+<div class="shell">
+
+  <nav class="sidenav" aria-label="Hauptnavigation">
+    <button data-go="cockpit">Cockpit</button>
+    <button data-go="plan">Fahrplan</button>
+    <button data-go="tasks">Aufgaben</button>
+    <button data-go="items">Artikel</button>
+    <button data-go="numbers">Zahlen</button>
+    <div class="nav-group">Werkzeuge</div>
+    <button data-go="buy">Kaufentscheid</button>
+    <button data-go="hours">Stundenkonto</button>
+    <button data-go="decisions">Entscheide</button>
+    <div class="nav-group">Grundlagen</div>
+    <button data-go="doc">Strategie</button>
+    <button data-go="legal">Recht und Admin</button>
+    <button data-go="settings">Einstellungen</button>
+  </nav>
+
+  <main>
+    <section class="view on" id="v-cockpit"></section>
+    <section class="view" id="v-plan"></section>
+    <section class="view" id="v-tasks"></section>
+    <section class="view" id="v-items"></section>
+    <section class="view" id="v-numbers"></section>
+    <section class="view" id="v-buy"></section>
+    <section class="view" id="v-hours"></section>
+    <section class="view" id="v-decisions"></section>
+    <section class="view" id="v-legal"></section>
+    <section class="view" id="v-doc"></section>
+    <section class="view" id="v-settings"></section>
+    <section class="view" id="v-more"></section>
+  </main>
+
+</div>
+
+<nav class="tabbar" aria-label="Navigation">
+  <button data-go="cockpit"><span class="t-ico">◱</span><span class="t-lbl">Cockpit</span></button>
+  <button data-go="plan"><span class="t-ico">↗</span><span class="t-lbl">Fahrplan</span></button>
+  <button data-go="tasks"><span class="t-ico">✓</span><span class="t-lbl">Aufgaben</span></button>
+  <button data-go="items"><span class="t-ico">▤</span><span class="t-lbl">Artikel</span></button>
+  <button data-go="numbers"><span class="t-ico">%</span><span class="t-lbl">Zahlen</span></button>
+  <button data-go="more" data-group="buy,hours,decisions,legal,doc,settings"><span class="t-ico">⋯</span><span class="t-lbl">Mehr</span></button>
+</nav>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box" role="document">
+    <div class="modal-head">
+      <h3 id="modal-title">—</h3>
+      <button class="iconbtn" id="modal-close" aria-label="Schliessen">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="btnrow" style="margin-top:18px">
+      <button class="btn wide" id="modal-save">Sichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
